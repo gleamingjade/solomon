@@ -8,6 +8,9 @@ public class SolomonApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SolomonApplication.class, args);
+
+		// docker compose -f /workspaces/codespaces-blank/docker/docker-compose-local.yml up -d 
+		// ./gradlew bootRun --args='--spring.profiles.active=local'
 	}
 
 }

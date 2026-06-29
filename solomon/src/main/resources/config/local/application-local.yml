@@ -1,0 +1,6 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+    import:
+      - optional:classpath:/config/local/application-local-mysql.yml
