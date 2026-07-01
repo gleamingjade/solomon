@@ -43,6 +43,8 @@ public class TrialMember extends BaseTimeEntity implements Persistable<TrialMemb
     @Column(nullable = false)
     private Turn turn;
 
+    private Integer readSeq;
+
     public static TrialMember create(Trial trial, Member member, String nickname) {
         TrialMember trialMember = new TrialMember();
 

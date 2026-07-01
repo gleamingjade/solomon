@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS member (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     
     email VARCHAR(255) UNIQUE NOT NULL,
     picture VARCHAR(255) NOT NULL,
     role VARCHAR(255) NOT NULL,
     
-    balance INT NOT NULL DEFAULT 1,
-    last_free_awarded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_ad_awarded_at DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00',
+    balance INT NOT NULL,
+    last_free_awarded_at DATETIME NOT NULL,
+    last_ad_awarded_at DATETIME NOT NULL,
     
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL

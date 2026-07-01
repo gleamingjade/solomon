@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS trial_member (
     trial_id BINARY(16) NOT NULL,
-    member_id INT NOT NULL,
+    member_id BIGINT NOT NULL,
     nickname VARCHAR(255) NOT NULL,
     turn VARCHAR(255) NOT NULL,
 

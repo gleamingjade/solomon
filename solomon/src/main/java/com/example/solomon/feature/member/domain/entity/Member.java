@@ -24,7 +24,7 @@ public class Member extends IdBaseEntity {
     private MemberRole role;
 
     @Column(nullable = false)
-    private int balance;
+    private Integer balance;
 
     @Column(nullable = false)
     private LocalDateTime lastFreeAwardedAt;

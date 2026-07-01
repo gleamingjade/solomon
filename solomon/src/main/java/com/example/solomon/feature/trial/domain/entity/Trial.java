@@ -28,6 +28,10 @@ public class Trial extends UuidBaseEntity {
     @Column(nullable = false)
     private Stage stage;
 
+    private String lastMessage;
+
+    private Integer lastMessageSeq;
+
     @OneToMany(mappedBy = "trial", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TrialMember> trialMembers = new ArrayList<>();
 

@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS trial (
     stage VARCHAR(255) NOT NULL,
 
     last_message TEXT,
-    last_message_seq INT,
+    last_message_seq BIGINT,
 
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
