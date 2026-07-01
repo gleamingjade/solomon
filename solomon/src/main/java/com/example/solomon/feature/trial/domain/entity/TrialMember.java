@@ -48,7 +48,6 @@ public class TrialMember extends BaseTimeEntity implements Persistable<TrialMemb
     public static TrialMember create(Trial trial, Member member, String nickname) {
         TrialMember trialMember = new TrialMember();
 
-        trialMember.id = new TrialMemberId(trial.getId(), member.getId());
         trialMember.trial = trial;
         trialMember.member = member;
         trialMember.nickname = nickname;
