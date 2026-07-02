@@ -4,7 +4,6 @@ services:
   # ========================
   mysql:
     image: mysql:8.0
-    container_name: local-mysql
     ports:
       - "3306:3306"
     environment:
@@ -30,7 +29,6 @@ services:
   # ========================
   kafka:
     image: confluentinc/cp-kafka:8.2.2
-    container_name: local-kafka
     ports:
       - "9092:9092"
     environment:
@@ -55,7 +53,6 @@ services:
   # ========================
   kafka-connect:
     image: quay.io/debezium/connect:3.4.3.Final
-    container_name: local-kafka-connect
     ports:
       - "8083:8083"
     depends_on:
@@ -80,7 +77,6 @@ services:
   # ========================
   kafka-ui:
     image: provectuslabs/kafka-ui:v0.7.2
-    container_name: local-kafka-ui
     ports:
       - "8084:8080"
     depends_on:

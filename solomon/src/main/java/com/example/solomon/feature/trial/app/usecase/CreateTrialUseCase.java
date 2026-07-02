@@ -1,6 +1,7 @@
 package com.example.solomon.feature.trial.app.usecase;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.solomon.common.app.dto.exception.AppException;
 import com.example.solomon.feature.member.app.dto.exception.MemberException;
@@ -20,6 +21,7 @@ public class CreateTrialUseCase {
     private final MemberRepository memberRepository;
     private final TrialRepository trialRepository;
 
+    @Transactional
     public String create(CreateTrialCommand command) {
         Member member = memberRepository.findById(command.memberId()).orElseThrow(() -> {
             throw new AppException(MemberException.UNEXISTS_MEMBER);
