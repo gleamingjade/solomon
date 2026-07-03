@@ -18,7 +18,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CreateTrialUseCase {
+
     private final MemberRepository memberRepository;
+    
     private final TrialRepository trialRepository;
 
     @Transactional

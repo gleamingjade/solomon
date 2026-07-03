@@ -1,5 +1,17 @@
 package com.example.solomon.feature.trial.app.usecase;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.UUID;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,7 +22,8 @@ import com.example.solomon.TestContainersConfig;
 import com.example.solomon.feature.member.domain.entity.Member;
 import com.example.solomon.feature.member.domain.repository.MemberRepository;
 import com.example.solomon.feature.trial.app.dto.CreateTrialCommand;
-import com.example.solomon.feature.trial.domain.repository.TrialRepository;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("local")
 @Import(TestContainersConfig.class)
@@ -23,15 +36,39 @@ public class CreateTrialUseCaseTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private TrialRepository trialRepository;
-
     @Test
     void testCreate() {
-        Member m = memberRepository.save(Member.create("email", "picture"));
+        Properties props = new Properties();
 
-        createTrialUseCase.create(new CreateTrialCommand(m.getId(), "issueTitle", "nickname"));
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, TestContainersConfig.KAFKA.getBootstrapServers());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
+        try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props)) {
+            consumer.subscribe(List.of("cdc-mysql.localdb.trial"));
+
+            Member m = memberRepository.save(Member.create("email", "picture"));
+            createTrialUseCase.create(new CreateTrialCommand(m.getId(), "issueTitle", "nickname"));
+
+            List<ConsumerRecord<String, String>> receivedRecords = new ArrayList<>();
+
+            Awaitility.await()
+                    .atMost(Duration.ofSeconds(15))
+                    .pollInterval(Duration.ofMillis(500))
+                    .untilAsserted(() -> {
+                        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(200));
+                        records.forEach(receivedRecords::add);
+
+                        assertThat(receivedRecords).isNotEmpty();
+
+                        boolean hasExpectedMessage = receivedRecords.stream()
+                                .anyMatch(record -> record.value().contains("issueTitle"));
+
+                        assertThat(hasExpectedMessage).isTrue();
+                    });
+        }
     }
 
 }

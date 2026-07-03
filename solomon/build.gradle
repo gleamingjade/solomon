@@ -27,6 +27,8 @@ dependencies {
 	implementation("org.flywaydb:flyway-mysql:11.20.0")
 	implementation("com.mysql:mysql-connector-j:8.0.32")
 
+	implementation("org.springframework.kafka:spring-kafka:3.3.16")
+
 	compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 	
