@@ -20,11 +20,11 @@ import lombok.RequiredArgsConstructor;
 public class CreateTrialUseCase {
 
     private final MemberRepository memberRepository;
-    
+
     private final TrialRepository trialRepository;
 
     @Transactional
-    public String create(CreateTrialCommand command) {
+    public String execute(CreateTrialCommand command) {
         Member member = memberRepository.findById(command.memberId()).orElseThrow(() -> {
             throw new AppException(MemberException.UNEXISTS_MEMBER);
         });

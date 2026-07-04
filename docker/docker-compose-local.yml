@@ -1,6 +1,6 @@
 services:
   # ========================
-  # MySQL (8.4 LTS)
+  # MySQL
   # ========================
   mysql:
     image: mysql:8.0
@@ -21,8 +21,14 @@ services:
       - --binlog-format=ROW
       - --binlog-row-image=FULL
       - --binlog-expire-logs-seconds=604800
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpass"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./dbz.sql:/docker-entrypoint-initdb.d/dbz.sql
 
   # ========================
   # Kafka (KRaft Mode)
@@ -35,8 +41,8 @@ services:
       CLUSTER_ID: "ciWo7IWazngRchmPES6q5A=="
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: "broker,controller"
-      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
-      KAFKA_LISTENERS: "INTERNAL://kafka:19092,CONTROLLER://kafka:29093,EXTERNAL://0.0.0.0:9092"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:19093"
+      KAFKA_LISTENERS: "INTERNAL://kafka:19092,CONTROLLER://kafka:19093,EXTERNAL://0.0.0.0:9092"
       KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:19092,EXTERNAL://localhost:9092"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
@@ -45,6 +51,11 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka:19092"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
     volumes:
       - kafka-data:/var/lib/kafka/data
 
@@ -56,8 +67,10 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - kafka
-      - mysql
+      kafka:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
     environment:
       BOOTSTRAP_SERVERS: kafka:19092
       GROUP_ID: 1
@@ -71,6 +84,33 @@ services:
       VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
       CONNECT_TOPIC_CREATION_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # ========================
+  # MySQL Connector Bootstrap
+  # ========================
+  connect-bootstrap:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      kafka-connect:
+        condition: service_healthy
+    volumes:
+      - ./mysql-connector-config.json:/mysql-connector-config.json
+    entrypoint:
+      - sh
+      - -c
+      - |
+        echo "registering...."
+
+        curl -X POST http://kafka-connect:8083/connectors \
+          -H "Content-Type: application/json" \
+          -d @/mysql-connector-config.json
+
+        echo "done"
 
   # ========================
   # Kafka UI

@@ -37,7 +37,7 @@ public class CreateTrialUseCaseTest {
     private MemberRepository memberRepository;
 
     @Test
-    void testCreate() {
+    void testCreateTrialUseCase() {
         Properties props = new Properties();
 
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, TestContainersConfig.KAFKA.getBootstrapServers());
@@ -53,7 +53,7 @@ public class CreateTrialUseCaseTest {
             Member m = memberRepository.save(Member.create("email", "picture"));
 
             // when
-            createTrialUseCase.create(new CreateTrialCommand(m.getId(), "issueTitle", "nickname"));
+            createTrialUseCase.execute(new CreateTrialCommand(m.getId(), "issueTitle", "nickname"));
 
             // then
             Awaitility.await()

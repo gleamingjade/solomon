@@ -40,7 +40,7 @@ public class TestContainersConfig {
                         .withPassword("localpass")
                         .withCopyToContainer(
                                         Transferable.of("""
-                                                        GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION CLIENT, REPLICATION SLAVE
+                                                        GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT
                                                         ON *.* TO 'localuser'@'%';
                                                         FLUSH PRIVILEGES;
                                                         """),
