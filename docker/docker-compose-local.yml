@@ -31,7 +31,25 @@ services:
       - ./dbz.sql:/docker-entrypoint-initdb.d/dbz.sql
 
   # ========================
-  # Kafka (KRaft Mode)
+  # Scylla
+  # ========================
+  scylla:
+      image: scylladb/scylla:2026.1.7
+      ports:
+        - "9042:9042"
+      command: --smp 1 --memory 2G
+      entrypoint: ["sh", "-c", "cqlsh scylla 9042 -f /init.cql"]
+      healthcheck:
+        test: ["CMD-SHELL", "nodetool status | grep -E '^UN' || exit 1"]
+        interval: 5s 
+        timeout: 3s 
+        retries: 30    
+      volumes:
+            - scylla_data:/var/lib/scylla
+            - ./init.cql:/docker-entrypoint-initdb.d/init.cql
+      
+  # ========================
+  # Kafka
   # ========================
   kafka:
     image: confluentinc/cp-kafka:8.2.2
@@ -53,17 +71,19 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     healthcheck:
       test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka:19092"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
+      interval: 5s
+      timeout: 3s
+      retries: 30
     volumes:
       - kafka-data:/var/lib/kafka/data
 
   # ========================
-  # Kafka Connect (Debezium)
+  # Kafka Connect
   # ========================
   kafka-connect:
-    image: quay.io/debezium/connect:3.4.3.Final
+    build:
+          context: .
+          dockerfile: debezium-image.Dockerfile
     ports:
       - "8083:8083"
     depends_on:
@@ -86,8 +106,8 @@ services:
       CONNECT_TOPIC_CREATION_ENABLE: "true"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 30
 
   # ========================
@@ -113,6 +133,28 @@ services:
         echo "done"
 
   # ========================
+  # Scylla Connector Bootstrap
+  # ========================
+  scylla-connect-bootstrap:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      kafka-connect:
+        condition: service_healthy
+    volumes:
+      - ./scylla-connector-config.json:/scylla-connector-config.json
+    entrypoint:
+      - sh
+      - -c
+      - |
+        echo "registering...."
+
+        curl -X POST http://kafka-connect:8083/connectors \
+          -H "Content-Type: application/json" \
+          -d @/scylla-connector-config.json
+
+        echo "done"
+        
+  # ========================
   # Kafka UI
   # ========================
   kafka-ui:
@@ -129,5 +171,6 @@ services:
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
 
 volumes:
-  kafka-data:
   mysql-data:
+  scylla_data:
+  kafka-data:
