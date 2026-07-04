@@ -2,6 +2,7 @@ package com.example.solomon;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.awaitility.Awaitility;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -11,10 +12,8 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
-import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.mysql.MySQLContainer;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
 import org.testcontainers.utility.DockerImageName;
 
 import java.net.URI;
@@ -118,10 +117,10 @@ public class TestContainersConfig {
         }
 
         private void waitForConnectorPlugin(GenericContainer<?> debezium) {
-
                 Awaitility.await()
                                 .atMost(Duration.ofMinutes(1))
                                 .pollInterval(Duration.ofSeconds(2))
+                                .ignoreExceptions()
                                 .until(() -> {
 
                                         String url = "http://"
@@ -144,13 +143,11 @@ public class TestContainersConfig {
         }
 
         private void registerDebeziumConnector(GenericContainer<?> debezium) {
-
                 Awaitility.await()
                                 .atMost(Duration.ofMinutes(1))
                                 .pollInterval(Duration.ofSeconds(2))
                                 .ignoreExceptions()
                                 .untilAsserted(() -> {
-
                                         String url = "http://"
                                                         + debezium.getHost()
                                                         + ":"
@@ -159,8 +156,7 @@ public class TestContainersConfig {
 
                                         Map<String, Object> config = new HashMap<>();
 
-                                        config.put("connector.class",
-                                                        "io.debezium.connector.mysql.MySqlConnector");
+                                        config.put("connector.class", "io.debezium.connector.mysql.MySqlConnector");
                                         config.put("tasks.max", "1");
 
                                         config.put("database.hostname", "mysql");
@@ -168,19 +164,14 @@ public class TestContainersConfig {
                                         config.put("database.user", "localuser");
                                         config.put("database.password", "localpass");
 
-                                        config.put("database.server.id", "5401");
+                                        config.put("database.server.id", "1234");
                                         config.put("database.include.list", "localdb");
                                         config.put("table.include.list", "localdb.trial");
 
                                         config.put("topic.prefix", "cdc-mysql");
 
-                                        config.put(
-                                                        "schema.history.internal.kafka.bootstrap.servers",
-                                                        "kafka:19092");
-
-                                        config.put(
-                                                        "schema.history.internal.kafka.topic",
-                                                        "schema-changes.localdb");
+                                        config.put("schema.history.internal.kafka.bootstrap.servers", "kafka:19092");
+                                        config.put("schema.history.internal.kafka.topic", "schema-changes.localdb");
 
                                         config.put("provide.transaction.metadata", "true");
 
@@ -188,8 +179,7 @@ public class TestContainersConfig {
                                                         "name", "mysql-source-connector",
                                                         "config", config);
 
-                                        String json = new ObjectMapper()
-                                                        .writeValueAsString(request);
+                                        String json = new ObjectMapper().writeValueAsString(request);
 
                                         HttpResponse<String> response = HttpClient.newHttpClient().send(
                                                         HttpRequest.newBuilder()

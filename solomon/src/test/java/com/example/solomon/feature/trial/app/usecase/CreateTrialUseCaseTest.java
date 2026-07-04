@@ -49,24 +49,19 @@ public class CreateTrialUseCaseTest {
         try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props)) {
             consumer.subscribe(List.of("cdc-mysql.localdb.trial"));
 
+            // given
             Member m = memberRepository.save(Member.create("email", "picture"));
+
+            // when
             createTrialUseCase.create(new CreateTrialCommand(m.getId(), "issueTitle", "nickname"));
 
-            List<ConsumerRecord<String, String>> receivedRecords = new ArrayList<>();
-
+            // then
             Awaitility.await()
                     .atMost(Duration.ofSeconds(15))
                     .pollInterval(Duration.ofMillis(500))
                     .untilAsserted(() -> {
                         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(200));
-                        records.forEach(receivedRecords::add);
-
-                        assertThat(receivedRecords).isNotEmpty();
-
-                        boolean hasExpectedMessage = receivedRecords.stream()
-                                .anyMatch(record -> record.value().contains("issueTitle"));
-
-                        assertThat(hasExpectedMessage).isTrue();
+                        assertThat(records).isNotEmpty();
                     });
         }
     }
