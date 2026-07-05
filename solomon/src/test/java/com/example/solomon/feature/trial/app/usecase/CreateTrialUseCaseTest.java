@@ -12,12 +12,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.example.solomon.KafkaTestSupport;
 import com.example.solomon.TestContainersConfig;
 import com.example.solomon.feature.member.domain.entity.Member;
 import com.example.solomon.feature.member.domain.repository.MemberRepository;
@@ -31,10 +33,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CreateTrialUseCaseTest {
 
     @Autowired
-    private CreateTrialUseCase createTrialUseCase;
+    private KafkaTestSupport kafkaTestSupport;
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private CreateTrialUseCase createTrialUseCase;
 
     @Test
     void testCreateTrialUseCase() {
@@ -56,13 +61,9 @@ public class CreateTrialUseCaseTest {
             createTrialUseCase.execute(new CreateTrialCommand(m.getId(), "issueTitle", "nickname"));
 
             // then
-            Awaitility.await()
-                    .atMost(Duration.ofSeconds(15))
-                    .pollInterval(Duration.ofMillis(500))
-                    .untilAsserted(() -> {
-                        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(200));
-                        assertThat(records).isNotEmpty();
-                    });
+            assertThat(kafkaTestSupport.pollRecords("cdc-mysql.localdb.trial")).anyMatch(record -> {
+                return record.value().contains("\"issue_title\":\"issueTitle\"");
+            });
         }
     }
 

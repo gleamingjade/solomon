@@ -1,0 +1,1 @@
+https://docs.scylladb.com/manual/stable/cql/ddl.html
