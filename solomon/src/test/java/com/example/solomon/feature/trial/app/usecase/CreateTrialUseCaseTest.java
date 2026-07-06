@@ -38,6 +38,7 @@ public class CreateTrialUseCaseTest {
 
         // then
         assertThat(kafkaTestSupport.pollRecords("cdc-mysql.localdb.trial")).anyMatch(record -> {
+            System.out.println(record.value());
             return record.value().contains("\"issue_title\":\"issueTitle\"");
         });
     }
