@@ -177,7 +177,8 @@ public class TestContainersConfig {
                         }
 
                         waitForConnectorPlugin(DEBEZIUM);
-                        registerDebeziumConnector(DEBEZIUM);
+                        registerMySQLSourceConnector(DEBEZIUM);
+                        registerScyllaSourceConnector(DEBEZIUM);
                 };
         }
 
@@ -207,7 +208,7 @@ public class TestContainersConfig {
                                 });
         }
 
-        private void registerDebeziumConnector(GenericContainer<?> debezium) {
+        private void registerMySQLSourceConnector(GenericContainer<?> debezium) {
                 Awaitility.await()
                                 .atMost(Duration.ofMinutes(1))
                                 .pollInterval(Duration.ofSeconds(2))
@@ -242,6 +243,54 @@ public class TestContainersConfig {
 
                                         Map<String, Object> request = Map.of(
                                                         "name", "mysql-source-connector",
+                                                        "config", config);
+
+                                        String json = new ObjectMapper().writeValueAsString(request);
+
+                                        HttpResponse<String> response = HttpClient.newHttpClient().send(
+                                                        HttpRequest.newBuilder()
+                                                                        .uri(URI.create(url))
+                                                                        .header("Content-Type", "application/json")
+                                                                        .POST(HttpRequest.BodyPublishers.ofString(json))
+                                                                        .build(),
+                                                        HttpResponse.BodyHandlers.ofString());
+
+                                        if (response.statusCode() != 201
+                                                        && response.statusCode() != 409) {
+                                                throw new IllegalStateException(response.body());
+                                        }
+                                });
+        }
+
+        private void registerScyllaSourceConnector(GenericContainer<?> debezium) {
+                Awaitility.await()
+                                .atMost(Duration.ofMinutes(1))
+                                .pollInterval(Duration.ofSeconds(2))
+                                .ignoreExceptions()
+                                .untilAsserted(() -> {
+                                        String url = "http://"
+                                                        + debezium.getHost()
+                                                        + ":"
+                                                        + debezium.getMappedPort(8083)
+                                                        + "/connectors";
+
+                                        Map<String, Object> config = new HashMap<>();
+
+                                        config.put("connector.class",
+                                                        "com.scylladb.cdc.debezium.connector.ScyllaConnector");
+                                        config.put("scylla.cluster.ip.addresses", "scylla:9042");
+                                        config.put("topic.prefix", "localscylla");
+                                        config.put("scylla.table.names", "localscylla.chat_message");
+
+                                        config.put("key.converter", "org.apache.kafka.connect.json.JsonConverter");
+                                        config.put("value.converter", "org.apache.kafka.connect.json.JsonConverter");
+                                        config.put("key.converter.schemas.enable", "true");
+                                        config.put("value.converter.schemas.enable", "true");
+
+                                        config.put("tasks.max", "1");
+
+                                        Map<String, Object> request = Map.of(
+                                                        "name", "scylla-source-connector",
                                                         "config", config);
 
                                         String json = new ObjectMapper().writeValueAsString(request);
