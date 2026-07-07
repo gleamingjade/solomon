@@ -12,6 +12,7 @@ public class SolomonApplication {
 		// docker compose -f /workspaces/codespaces-blank/docker/docker-compose-local.yml down -v --rmi all
 		// docker compose -f /workspaces/codespaces-blank/docker/docker-compose-local.yml up -d 
 		// ./gradlew bootRun --args='--spring.profiles.active=local'
+		
 	}
 
 }
