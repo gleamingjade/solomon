@@ -1,4 +1,4 @@
-package com.example.solomon.common.infra.messaging.kafka.config;
+package com.example.solomon.common.config.kafka;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
 
-import com.example.solomon.common.infra.messaging.kafka.DebeziumEnvelope;
+import com.example.solomon.common.app.dto.DebeziumEnvelope;
 
 // Referenced by https://docs.spring.io/spring-kafka/reference/kafka/container-factory.html
 @Configuration
@@ -33,7 +33,7 @@ public class KafkaConsumerConfig {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    private Map<String, Object> commonConsumerProps() {
+    private Map<String, Object> getBaseProps() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -48,7 +48,7 @@ public class KafkaConsumerConfig {
     // @formatter:on
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, DebeziumEnvelope> trialCreatedConsumer() {
-        Map<String, Object> props = commonConsumerProps();
+        Map<String, Object> props = getBaseProps();
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "trial-created-topic-consumer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");

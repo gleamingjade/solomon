@@ -1,4 +1,4 @@
-package com.example.solomon.common.infra.messaging.kafka.config;
+package com.example.solomon.common.config.kafka;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,7 @@ import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
-import com.example.solomon.common.infra.messaging.kafka.DebeziumEnvelope;
+import com.example.solomon.common.app.dto.DebeziumEnvelope;
 
 // Referenced by https://docs.spring.io/spring-kafka/reference/streams.html#kafka-streams-example
 @Configuration
@@ -40,9 +40,6 @@ public class KafkaStreamsConfig {
                 return props;
         }
 
-        // @formatter:off
-        // You know that we have to divide the APPLICATION_ID_CONFIG of cdc streams with general events.
-        // @formatter:on
         @Bean(name = "cdcStreamsBuilder")
         public StreamsBuilderFactoryBean cdcStreamsBuilder() {
                 Map<String, Object> props = getBaseProps();
@@ -51,16 +48,8 @@ public class KafkaStreamsConfig {
                 return new StreamsBuilderFactoryBean(new KafkaStreamsConfiguration(props));
         }
 
-        @Bean(name = "generalStreamsBuilder")
-        public StreamsBuilderFactoryBean generalStreamsBuilder() {
-                Map<String, Object> props = getBaseProps();
-                props.put(StreamsConfig.APPLICATION_ID_CONFIG, "solomon-general-streams");
-
-                return new StreamsBuilderFactoryBean(new KafkaStreamsConfiguration(props));
-        }
-
         @Bean
-        public KStream<String, DebeziumEnvelope> debeziumStream(
+        public KStream<String, DebeziumEnvelope> cdcStream(
                         @Qualifier("cdcStreamsBuilder") StreamsBuilder streamsBuilder) {
 
                 JsonSerde<DebeziumEnvelope> debeziumSerde = new JsonSerde<>(DebeziumEnvelope.class);

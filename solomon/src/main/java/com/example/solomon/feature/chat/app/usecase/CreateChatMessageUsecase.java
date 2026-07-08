@@ -18,7 +18,7 @@ public class CreateChatMessageUsecase {
         chatMessageRepository
                 .save(ChatMessage.create(command.trialId(), command.memberId(), command.content()));
 
-        // 채팅 웹소켓 발송용 애플리케이션 이벤트 발송(프레임워크에 묶이는 건 괜찮음 내가 봤을 때)
+        // ChatMessageCreatedEvent publish
     }
 
 }
