@@ -30,7 +30,7 @@ public class Trial extends UuidBaseEntity {
 
     private String lastMessage;
 
-    private Integer lastMessageSeq;
+    private Long lastMessageSeq;
 
     @OneToMany(mappedBy = "trial", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TrialMember> trialMembers = new ArrayList<>();
@@ -44,6 +44,11 @@ public class Trial extends UuidBaseEntity {
         tr.trialMembers.add(tm);
 
         return tr;
+    }
+
+    public void onNewChatMessage(String lastMessage, Long lastMessageSeq) {
+        this.lastMessage = lastMessage;
+        this.lastMessageSeq = lastMessageSeq;
     }
 
 }

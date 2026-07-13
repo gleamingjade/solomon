@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import com.example.solomon.common.app.dto.DebeziumEnvelope;
+import com.example.solomon.common.infra.messaging.kafka.DebeziumEnvelope;
 import com.example.solomon.feature.chat.app.dto.CreateChatMessageCommand;
 import com.example.solomon.feature.chat.app.usecase.CreateChatMessageUsecase;
 import com.example.solomon.feature.trial.domain.entity.TrialMember;
@@ -21,7 +21,7 @@ public class TrialCreatedConsumer {
 
     private final CreateChatMessageUsecase createChatMessageUsecase;
 
-    @KafkaListener(topics = "mysql.localdb.trial-created", containerFactory = "trialCreatedConsumer")
+    @KafkaListener(topics = "cdc-mysql.localdb.trial-created", containerFactory = "trialCreatedConsumerFactory")
     public void consume(DebeziumEnvelope envelope) {
         UUID trialId = UUID.fromString(envelope.payload().after().get("id").asText());
 

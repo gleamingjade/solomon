@@ -3,11 +3,13 @@ package com.example.solomon;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.awaitility.Awaitility;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.core.KafkaAdmin;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -101,6 +103,7 @@ public class TestContainersConfig {
         private static void initScyllaProperties() {
                 System.setProperty("spring.cassandra.contact-points", SCYLLA.getHost());
                 System.setProperty("spring.cassandra.port", SCYLLA.getMappedPort(9042).toString());
+                System.setProperty("spring.cassandra.keyspace-name", "localscylla");
                 System.setProperty("spring.cassandra.local-datacenter", "datacenter1");
                 System.setProperty("spring.cassandra.schema-action", "none");
         }
@@ -112,7 +115,7 @@ public class TestContainersConfig {
                         .withListener("kafka:19092")
                         .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5)));
 
-        public static final ImageFromDockerfile debeziumImage = new ImageFromDockerfile("debezium")
+        public static final ImageFromDockerfile DEBEZIUM_IMAGE = new ImageFromDockerfile("debezium")
                         .withDockerfileFromBuilder(builder -> builder
                                         .from("quay.io/debezium/connect:3.4.3.Final")
                                         .user("root")
@@ -122,7 +125,7 @@ public class TestContainersConfig {
                                         .user("kafka")
                                         .build());
 
-        public static final GenericContainer<?> DEBEZIUM = new GenericContainer<>(debeziumImage)
+        public static final GenericContainer<?> DEBEZIUM = new GenericContainer<>(DEBEZIUM_IMAGE)
                         .withNetwork(NETWORK)
                         .withExposedPorts(8083)
                         .dependsOn(KAFKA)
@@ -165,8 +168,21 @@ public class TestContainersConfig {
         }
 
         @Bean
+        KafkaAdmin kafkaAdmin() {
+                return new KafkaAdmin(
+                                Map.of(
+                                                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
+                                                KAFKA.getBootstrapServers()));
+        }
+
+        @Bean
         public KafkaTestSupport kafkaTestSupport() {
                 return new KafkaTestSupport(KAFKA.getBootstrapServers());
+        }
+
+        @Bean
+        public DebeziumTestSupport debeziumTestSupport() {
+                return new DebeziumTestSupport(DEBEZIUM);
         }
 
         @Bean
@@ -279,7 +295,7 @@ public class TestContainersConfig {
                                         config.put("connector.class",
                                                         "com.scylladb.cdc.debezium.connector.ScyllaConnector");
                                         config.put("scylla.cluster.ip.addresses", "scylla:9042");
-                                        config.put("topic.prefix", "localscylla");
+                                        config.put("topic.prefix", "cdc-scylla");
                                         config.put("scylla.table.names", "localscylla.chat_message");
 
                                         config.put("key.converter", "org.apache.kafka.connect.json.JsonConverter");

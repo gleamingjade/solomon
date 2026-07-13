@@ -7,7 +7,7 @@
     "database.user": "debezium",
     "database.password": "dbz",
     "database.server.id": "123456",
-    "topic.prefix": "mysql",
+    "topic.prefix": "cdc-mysql",
     "database.include.list": "localdb",
     "table.include.list": "localdb.trial",
     "include.schema.changes": "true",

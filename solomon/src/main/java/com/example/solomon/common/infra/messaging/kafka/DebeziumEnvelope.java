@@ -1,4 +1,4 @@
-package com.example.solomon.common.app.dto;
+package com.example.solomon.common.infra.messaging.kafka;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;

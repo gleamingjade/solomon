@@ -17,7 +17,7 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
 
-import com.example.solomon.common.app.dto.DebeziumEnvelope;
+import com.example.solomon.common.infra.messaging.kafka.DebeziumEnvelope;
 
 // Referenced by https://docs.spring.io/spring-kafka/reference/kafka/container-factory.html
 @Configuration
@@ -47,7 +47,7 @@ public class KafkaConsumerConfig {
     // than using yml auto configuration so that the consumer can have their own way to handle the event.
     // @formatter:on
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, DebeziumEnvelope> trialCreatedConsumer() {
+    public ConcurrentKafkaListenerContainerFactory<String, DebeziumEnvelope> trialCreatedConsumerFactory() {
         Map<String, Object> props = getBaseProps();
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "trial-created-topic-consumer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
@@ -62,6 +62,28 @@ public class KafkaConsumerConfig {
         // If processing fails, the error record is automatically published to the
         // dead-letter topic with a ".DLT" suffix appended to the original topic name.
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate);
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 3L));
+
+        factory.setCommonErrorHandler(errorHandler);
+
+        return factory;
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, DebeziumEnvelope> chatMessageCreatedConsumerFactory() {
+        Map<String, Object> props = getBaseProps();
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "chat-message-created-topic-consumer");
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+
+        DefaultKafkaConsumerFactory<String, DebeziumEnvelope> consumerFactory = new DefaultKafkaConsumerFactory<>(props,
+                new StringDeserializer(), new JsonDeserializer<>(DebeziumEnvelope.class, false));
+
+        ConcurrentKafkaListenerContainerFactory<String, DebeziumEnvelope> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory);
+
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate);
+
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 3L));
 
         factory.setCommonErrorHandler(errorHandler);

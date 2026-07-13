@@ -3,4 +3,7 @@ spring:
     activate:
       on-profile: local
     import:
+      - optional:classpath:/config/local/application-local-kafka.yml
       - optional:classpath:/config/local/application-local-mysql.yml
+      - optional:classpath:/config/local/application-local-redis.yml
+      - optional:classpath:/config/local/application-local-scylla.yml

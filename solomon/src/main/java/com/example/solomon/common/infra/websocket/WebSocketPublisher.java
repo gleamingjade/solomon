@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import com.example.solomon.feature.chat.infra.messaging.event.ChatMessageCreatedEvent;
+import com.example.solomon.feature.chat.infra.messaging.ChatMessageCreatedEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,19 +14,19 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSocketPublisher {
 
-    private final SimpMessageSendingOperations simpMessageSendingOperations;
+    // private final SimpMessageSendingOperations simpMessageSendingOperations;
 
-    private final RedisTemplate<String, Object> chatRedisTemplate;
+    // private final RedisTemplate<String, Object> chatRedisTemplate;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void publishChatMessage(ChatMessageCreatedEvent event) {
-        chatRedisTemplate.convertAndSend(
-                "chat.message.created",
-                event);
-    }
+    // @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    // public void publishChatMessage(ChatMessageCreatedEvent event) {
+    //     chatRedisTemplate.convertAndSend(
+    //             "chat.message.created",
+    //             event);
+    // }
 
-    // redis sub 후 해당 채팅방에 참여중인 member 검색해서 fanout
-    public void send() {
-    }
+    // // redis sub 후 해당 채팅방에 참여중인 member 검색해서 fanout
+    // public void send() {
+    // }
 
 }

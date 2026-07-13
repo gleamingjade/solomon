@@ -9,7 +9,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum TrialException implements ExceptionInfo {
 
-    ONGOING_TRIAL_EXISTS(HttpStatus.BAD_REQUEST, "ongoing trial exists.");
+    ONGOING_TRIAL_EXISTS(HttpStatus.BAD_REQUEST, "ongoing trial exists."),
+    UNEXISTS_TRIAL(HttpStatus.BAD_REQUEST, "ongoing trial exists.");
 
     private final HttpStatus httpStatus;
     private final String message;

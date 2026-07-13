@@ -5,12 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.example.solomon.KafkaTestSupport;
 import com.example.solomon.TestContainersConfig;
 import com.example.solomon.feature.member.domain.entity.Member;
 import com.example.solomon.feature.member.domain.repository.MemberRepository;
 import com.example.solomon.feature.trial.app.dto.CreateTrialCommand;
+import com.example.solomon.feature.trial.infra.messaging.TrialCreatedConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,6 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(TestContainersConfig.class)
 @SpringBootTest
 public class CreateTrialUseCaseTest {
+
+    // This test is only for the usecase. consumer have to speak when spoken to.
+    @MockitoBean
+    private TrialCreatedConsumer trialCreatedConsumer;
 
     @Autowired
     private KafkaTestSupport kafkaTestSupport;

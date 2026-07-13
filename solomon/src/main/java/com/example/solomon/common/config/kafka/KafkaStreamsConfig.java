@@ -1,6 +1,8 @@
 package com.example.solomon.common.config.kafka;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -20,7 +22,7 @@ import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
-import com.example.solomon.common.app.dto.DebeziumEnvelope;
+import com.example.solomon.common.infra.messaging.kafka.DebeziumEnvelope;
 
 // Referenced by https://docs.spring.io/spring-kafka/reference/streams.html#kafka-streams-example
 @Configuration
@@ -51,10 +53,9 @@ public class KafkaStreamsConfig {
         @Bean
         public KStream<String, DebeziumEnvelope> cdcStream(
                         @Qualifier("cdcStreamsBuilder") StreamsBuilder streamsBuilder) {
-
                 JsonSerde<DebeziumEnvelope> debeziumSerde = new JsonSerde<>(DebeziumEnvelope.class);
 
-                KStream<String, DebeziumEnvelope> stream = streamsBuilder.stream("mysql.localdb.trial",
+                KStream<String, DebeziumEnvelope> stream = streamsBuilder.stream("cdc-mysql.localdb.trial",
                                 Consumed.with(Serdes.String(), debeziumSerde))
                                 .filter((key, envelope) -> envelope != null && envelope.payload() != null);
 
@@ -62,12 +63,12 @@ public class KafkaStreamsConfig {
                                 .branch(
                                                 (key, envelope) -> envelope.payload().op() != null
                                                                 && "c".equals(envelope.payload().op()),
-                                                Branched.withConsumer(ks -> ks.to("mysql.localdb.trial-created",
+                                                Branched.withConsumer(ks -> ks.to("cdc-mysql.localdb.trial-created",
                                                                 Produced.with(Serdes.String(), debeziumSerde))))
                                 .branch(
                                                 (key, envelope) -> envelope.payload().op() != null
                                                                 && "u".equals(envelope.payload().op()),
-                                                Branched.withConsumer(ks -> ks.to("mysql.localdb.trial-updated",
+                                                Branched.withConsumer(ks -> ks.to("cdc-mysql.localdb.trial-updated",
                                                                 Produced.with(Serdes.String(), debeziumSerde))));
                 return stream;
         }

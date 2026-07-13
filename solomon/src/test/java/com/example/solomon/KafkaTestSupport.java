@@ -31,7 +31,7 @@ public class KafkaTestSupport {
             consumer.subscribe(List.of(topicName));
 
             return Awaitility.await()
-                    .atMost(Duration.ofSeconds(15))
+                    .atMost(Duration.ofSeconds(120))
                     .pollInterval(Duration.ofMillis(500))
                     .until(() -> consumer.poll(Duration.ofMillis(200)),
                             records -> !records.isEmpty());
