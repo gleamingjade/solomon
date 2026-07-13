@@ -18,7 +18,8 @@ import com.example.solomon.DebeziumTestSupport;
 import com.example.solomon.KafkaTestSupport;
 import com.example.solomon.SlicedSpringContextTest;
 import com.example.solomon.TestContainersConfig;
-import com.example.solomon.feature.chat.app.dto.CreateChatMessageCommand;
+import com.example.solomon.feature.chat.application.in.usecase.CreateChatMessageUsecase;
+import com.example.solomon.feature.chat.application.in.usecase.dto.CreateChatMessageCommand;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -9,11 +9,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.example.solomon.KafkaTestSupport;
 import com.example.solomon.TestContainersConfig;
+import com.example.solomon.feature.chat.adapter.in.kafka.TrialCreatedConsumer;
 import com.example.solomon.feature.member.domain.entity.Member;
 import com.example.solomon.feature.member.domain.repository.MemberRepository;
-import com.example.solomon.feature.trial.adapter.in.kafka.TrialCreatedConsumer;
-import com.example.solomon.feature.trial.application.usecase.CreateTrialUseCase;
-import com.example.solomon.feature.trial.application.usecase.dto.CreateTrialCommand;
+import com.example.solomon.feature.trial.application.port.in.usecase.CreateTrialUseCase;
+import com.example.solomon.feature.trial.application.port.in.usecase.dto.CreateTrialCommand;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

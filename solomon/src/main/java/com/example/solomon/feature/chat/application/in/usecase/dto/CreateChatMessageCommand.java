@@ -1,4 +1,4 @@
-package com.example.solomon.feature.chat.app.dto;
+package com.example.solomon.feature.chat.application.in.usecase.dto;
 
 import java.util.UUID;
 

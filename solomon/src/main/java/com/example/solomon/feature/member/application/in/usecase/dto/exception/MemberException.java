@@ -1,4 +1,4 @@
-package com.example.solomon.feature.member.app.dto.exception;
+package com.example.solomon.feature.member.application.in.usecase.dto.exception;
 
 import org.springframework.http.HttpStatus;
 

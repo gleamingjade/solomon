@@ -1,8 +1,8 @@
-package com.example.solomon.feature.chat.app.usecase;
+package com.example.solomon.feature.chat.application.in.usecase;
 
 import org.springframework.stereotype.Service;
 
-import com.example.solomon.feature.chat.app.dto.CreateChatMessageCommand;
+import com.example.solomon.feature.chat.application.in.usecase.dto.CreateChatMessageCommand;
 import com.example.solomon.feature.chat.domain.entity.ChatMessage;
 import com.example.solomon.feature.chat.domain.repository.ChatMessageRepository;
 import com.example.solomon.feature.chat.domain.repository.ChatMessageSeqRepository;
