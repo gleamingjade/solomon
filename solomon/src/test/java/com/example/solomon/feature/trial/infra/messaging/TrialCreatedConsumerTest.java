@@ -10,8 +10,8 @@ import com.example.solomon.KafkaTestSupport;
 import com.example.solomon.TestContainersConfig;
 import com.example.solomon.feature.member.domain.entity.Member;
 import com.example.solomon.feature.member.domain.repository.MemberRepository;
-import com.example.solomon.feature.trial.app.dto.CreateTrialCommand;
-import com.example.solomon.feature.trial.app.usecase.CreateTrialUseCase;
+import com.example.solomon.feature.trial.application.usecase.CreateTrialUseCase;
+import com.example.solomon.feature.trial.application.usecase.dto.CreateTrialCommand;
 import com.example.solomon.feature.trial.domain.entity.Trial;
 import com.example.solomon.feature.trial.domain.repository.TrialRepository;
 

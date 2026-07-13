@@ -1,4 +1,4 @@
-package com.example.solomon.feature.trial.app.dto.exception;
+package com.example.solomon.feature.trial.domain.exception;
 
 import org.springframework.http.HttpStatus;
 

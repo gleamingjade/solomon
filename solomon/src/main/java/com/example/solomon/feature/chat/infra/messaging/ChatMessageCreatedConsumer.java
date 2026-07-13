@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.example.solomon.common.app.dto.exception.AppException;
 import com.example.solomon.common.infra.messaging.kafka.DebeziumEnvelope;
-import com.example.solomon.feature.trial.app.dto.exception.TrialException;
 import com.example.solomon.feature.trial.domain.entity.Trial;
+import com.example.solomon.feature.trial.domain.exception.TrialException;
 import com.example.solomon.feature.trial.domain.repository.TrialRepository;
 
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.example.solomon.feature.trial.infra.messaging;
+package com.example.solomon.feature.trial.adapter.in.kafka;
 
 import java.util.UUID;
 
