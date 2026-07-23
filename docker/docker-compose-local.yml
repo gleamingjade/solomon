@@ -128,7 +128,7 @@ services:
   # ========================
   # MySQL Connector Bootstrap
   # ========================
-  connect-bootstrap:
+  mysql-connector-bootstrap:
     image: curlimages/curl:8.5.0
     depends_on:
       kafka-connect:
@@ -150,7 +150,7 @@ services:
   # ========================
   # Scylla Connector Bootstrap
   # ========================
-  scylla-connect-bootstrap:
+  scylla-connector-bootstrap:
     image: curlimages/curl:8.5.0
     depends_on:
       kafka-connect:
@@ -185,7 +185,27 @@ services:
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: debezium
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
 
+  redis:
+    image: redis:8
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+
 volumes:
   mysql-data:
   scylla_data:
   kafka-data:
+  redis-data:

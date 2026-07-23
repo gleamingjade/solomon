@@ -1,0 +1,44 @@
+package com.example.solomon.common.adapter.in.web.security.config;
+
+import com.example.solomon.common.adapter.in.web.security.handler.OAuth2AccessDeniedHandler;
+import com.example.solomon.common.adapter.in.web.security.handler.OAuth2AuthenticationEntryPoint;
+import com.example.solomon.common.adapter.in.web.security.handler.OAuth2LoginFailureHandler;
+import com.example.solomon.common.adapter.in.web.security.handler.OAuth2LoginSuccessHandler;
+import com.example.solomon.common.adapter.in.web.security.oauth.SessionRedisOidcUserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final SessionRedisOidcUserService sessionRedisOidcUserService;
+
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+
+    private final OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    private final OAuth2AccessDeniedHandler accessDeniedHandler;
+
+    @Bean
+    public SecurityFilterChain claudeSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.oidcUserService(sessionRedisOidcUserService))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler));
+
+        return http.build();
+    }
+
+}

@@ -3,8 +3,8 @@ package com.example.solomon.feature.chat.infra.messaging;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import com.example.solomon.common.app.dto.exception.AppException;
-import com.example.solomon.common.infra.messaging.kafka.DebeziumEnvelope;
+import com.example.solomon.common.domain.entity.exception.DomainException;
+import com.example.solomon.common.adapter.in.messaging.kafka.DebeziumEnvelope;
 import com.example.solomon.feature.trial.adapter.out.persistence.jpa.SpringDataJpaTrialRepository;
 import com.example.solomon.feature.trial.domain.entity.Trial;
 import com.example.solomon.feature.trial.domain.exception.TrialException;
@@ -24,7 +24,7 @@ public class ChatMessageCreatedConsumer {
         // 웹소켓 fanout
         // db 업데이트
         Trial trial = trialRepository.findByIdWithTrialMembers(event.trialId())
-                .orElseThrow(() -> new AppException(TrialException.UNEXISTS_TRIAL));
+                .orElseThrow(() -> new DomainException(TrialException.UNEXISTS_TRIAL));
 
         trial.onNewChatMessage(event.content(), event.sequence());
 
@@ -48,7 +48,7 @@ public class ChatMessageCreatedConsumer {
         ChatMessageCreatedEvent event = ChatMessageCreatedEvent.from(envelope);
 
         trialRepository.findById(event.trialId())
-                .orElseThrow(() -> new AppException(TrialException.UNEXISTS_TRIAL))
+                .orElseThrow(() -> new DomainException(TrialException.UNEXISTS_TRIAL))
                 .onNewChatMessage(event.content(), event.sequence());
     }
 }

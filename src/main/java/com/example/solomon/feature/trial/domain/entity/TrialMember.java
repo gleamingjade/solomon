@@ -2,7 +2,7 @@ package com.example.solomon.feature.trial.domain.entity;
 
 import org.springframework.data.domain.Persistable;
 
-import com.example.solomon.common.infra.persistence.jpa.domain.entity.BaseTimeEntity;
+import com.example.solomon.common.domain.entity.BaseTimeEntity;
 import com.example.solomon.feature.member.domain.entity.Member;
 
 import jakarta.persistence.Column;

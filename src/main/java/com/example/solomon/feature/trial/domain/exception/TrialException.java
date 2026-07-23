@@ -2,7 +2,7 @@ package com.example.solomon.feature.trial.domain.exception;
 
 import org.springframework.http.HttpStatus;
 
-import com.example.solomon.common.app.dto.exception.ExceptionInfo;
+import com.example.solomon.common.domain.entity.exception.ExceptionInfo;
 
 import lombok.RequiredArgsConstructor;
 

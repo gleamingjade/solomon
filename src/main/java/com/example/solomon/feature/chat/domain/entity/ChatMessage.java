@@ -23,12 +23,12 @@ public class ChatMessage {
     @Column("member_id")
     private Long memberId;
 
-    private Long sequnece;
+    private Long sequence;
 
     private String content;
 
-    public static ChatMessage create(UUID trialId, Long memberId, Long sequnece, String content) {
-        return new ChatMessage(ChatMessageKey.create(trialId), memberId, sequnece, content);
+    public static ChatMessage create(UUID trialId, Long memberId, Long sequence, String content) {
+        return new ChatMessage(ChatMessageKey.create(trialId), memberId, sequence, content);
     }
 
 }

@@ -26,6 +26,11 @@ public class SpringDataJpaTrialRepositoryAdapter implements TrialRepository {
     }
 
     @Override
+    public Optional<Trial> findById(UUID id) {
+        return jpaTrialRepository.findById(id);
+    }
+
+    @Override
     public long countUnTerminatedTrialByMemberId(Long memberId, Stage stage) {
         return jpaTrialRepository.countUnTerminatedTrialByMemberId(memberId, stage);
     }

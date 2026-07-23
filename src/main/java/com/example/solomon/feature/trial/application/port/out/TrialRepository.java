@@ -13,6 +13,8 @@ public interface TrialRepository {
 
     public Trial save(Trial trial);
 
+    public Optional<Trial> findById(UUID id);
+
     public long countUnTerminatedTrialByMemberId(
             Long memberId,
             Stage stage);

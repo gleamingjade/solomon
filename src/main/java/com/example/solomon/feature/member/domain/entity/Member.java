@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
-import com.example.solomon.common.infra.persistence.jpa.domain.entity.IdBaseEntity;
+import com.example.solomon.common.domain.entity.IdBaseEntity;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

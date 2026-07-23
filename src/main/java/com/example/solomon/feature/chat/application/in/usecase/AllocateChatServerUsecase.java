@@ -2,7 +2,7 @@ package com.example.solomon.feature.chat.application.in.usecase;
 
 import org.springframework.stereotype.Service;
 
-import com.example.solomon.feature.chat.application.out.ChatServerMappingRepository;
+import com.example.solomon.feature.chat.application.out.ChatMessageSeqRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AllocateChatServerUsecase {
 
-    private final ChatServerMappingRepository chatServerMappingRepository;
+    private final ChatMessageSeqRepository chatMessageSeqRepository;
 
     public void allocate() {
         // 현재 서버 개수 조회

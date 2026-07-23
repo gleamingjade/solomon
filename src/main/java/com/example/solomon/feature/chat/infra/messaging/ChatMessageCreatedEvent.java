@@ -2,7 +2,7 @@ package com.example.solomon.feature.chat.infra.messaging;
 
 import java.util.UUID;
 
-import com.example.solomon.common.infra.messaging.kafka.DebeziumEnvelope;
+import com.example.solomon.common.adapter.in.messaging.kafka.DebeziumEnvelope;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public record ChatMessageCreatedEvent(
