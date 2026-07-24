@@ -1,5 +1,7 @@
 package com.example.solomon;
 
+import java.util.TimeZone;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -7,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SolomonApplication {
 
 	public static void main(String[] args) {
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 		SpringApplication.run(SolomonApplication.class, args);
 
 		// docker compose -f ~/Projects/solomon/docker/docker-compose-local.yml down -v --rmi all

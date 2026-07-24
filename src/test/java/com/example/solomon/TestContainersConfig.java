@@ -56,7 +56,7 @@ public class TestContainersConfig {
                                         "mysqld",
                                         "--character-set-server=utf8mb4",
                                         "--collation-server=utf8mb4_unicode_ci",
-                                        "--default-time-zone=+09:00",
+                                        "--default-time-zone=+00:00",
                                         "--server-id=1",
                                         "--log-bin=mysql-bin",
                                         "--binlog-format=ROW",
