@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.support.serializer.JsonSerde;
@@ -24,7 +23,6 @@ import com.example.solomon.common.adapter.in.messaging.kafka.DebeziumEnvelope;
 
 // Referenced by https://docs.spring.io/spring-kafka/reference/streams.html#kafka-streams-example
 @Configuration
-@EnableKafkaStreams
 public class KafkaStreamsConfig {
 
         private final String bootstrapServers;

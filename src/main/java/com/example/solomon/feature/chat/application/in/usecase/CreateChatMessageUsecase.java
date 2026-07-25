@@ -14,21 +14,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreateChatMessageUsecase {
 
-    private final ChatMessageSender chatMessageSender;
-
-    private final ChatMessageRepository chatMessageRepository;
-
-    private final ChatMessageSeqRepository chatMessageSeqRepository;
+//    private final ChatMessageSender chatMessageSender;
+//
+//    private final ChatMessageRepository chatMessageRepository;
+//
+//    private final ChatMessageSeqRepository chatMessageSeqRepository;
 
     public void execute(CreateChatMessageCommand command) {
-        Long seq = chatMessageSeqRepository.incr(command.trialId().toString());
-
-        if (seq == 0L) {
-            // fill back
-        } else {
-            chatMessageSender.fanout(chatMessageRepository
-                    .save(ChatMessage.create(command.trialId(), command.memberId(), seq, command.content())));
-        }
+//        Long seq = chatMessageSeqRepository.incr(command.trialId().toString());
+//
+//        if (seq == 0L) {
+//            // fill back
+//        } else {
+//            chatMessageSender.fanout(chatMessageRepository
+//                    .save(ChatMessage.create(command.trialId(), command.memberId(), seq, command.content())));
+//        }
     }
 
 }

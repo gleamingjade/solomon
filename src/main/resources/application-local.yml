@@ -8,3 +8,8 @@ spring:
       - optional:classpath:/config/local/application-local-redis.yml
       - optional:classpath:/config/local/application-local-scylla.yml
       - optional:classpath:/config/local/application-local-oauth2.yml
+      - optional:file:./env/local.env[.properties]
+
+logging:
+  level:
+    com.example.solomon.common.adapter.in.web.security.handler: debug

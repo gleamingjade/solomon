@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -33,13 +34,13 @@ public class SessionRedisOidcUserService extends OidcUserService {
         Member member = memberRepository.findByEmail(email)
                 .orElseGet(() -> memberRepository.save(Member.create(email, picture)));
 
-        Collection<GrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
+        Collection<GrantedAuthority> authorities = new ArrayList<>(List.of(
+                new SimpleGrantedAuthority("ROLE_" + member.getRole().name())));
 
         SessionMember sessionMember = new SessionMember(
                 String.valueOf(member.getId()), authorities, currentHttpSessionId());
 
-        return new SessionRedisOidcUser(oidcUser, sessionMember);
+        return new SessionRedisOidcUser(sessionMember);
     }
 
     private String currentHttpSessionId() {

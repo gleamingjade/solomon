@@ -1,12 +1,9 @@
 spring:
-  config:
-    import:
-      - "optional:file:./env/local.env[.properties]"
-
   session:
     store-type: redis
     redis:
       namespace: solomon:session
+      timeout: 1h
 
   security:
     oauth2:

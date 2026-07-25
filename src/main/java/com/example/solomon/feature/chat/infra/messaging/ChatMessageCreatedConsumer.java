@@ -21,20 +21,6 @@ public class ChatMessageCreatedConsumer {
     public void consume(DebeziumEnvelope envelope) {
         ChatMessageCreatedEvent event = ChatMessageCreatedEvent.from(envelope);
 
-        // 웹소켓 fanout
-        // db 업데이트
-        Trial trial = trialRepository.findByIdWithTrialMembers(event.trialId())
-                .orElseThrow(() -> new DomainException(TrialException.UNEXISTS_TRIAL));
-
-        trial.onNewChatMessage(event.content(), event.sequence());
-
-        trial.getTrialMembers();
-
-        // 메시지 오면 해당 방에 참여중인 유저 검색,
-        // caffaine에 올림
-        // fanout
-        // last_message, last_message_seq
-        // fanout
 
     }
 

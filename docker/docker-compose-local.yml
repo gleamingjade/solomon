@@ -185,27 +185,51 @@ services:
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: debezium
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
 
-  redis:
+  # ========================
+  # Redis
+  # ========================
+  session-redis:
     image: redis:8
     ports:
       - "6379:6379"
     volumes:
-      - redis-data:/data
+      - session-redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 30
 
+  # ========================
+  # Redis
+  # ========================
+  trial-cache-redis:
+    image: redis:8
+    ports:
+      - "6380:6379"
+    volumes:
+      - trial-cache-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # ========================
+  # Redis Insight
+  # ========================
   redisinsight:
     image: redis/redisinsight:latest
     ports:
       - "5540:5540"
     depends_on:
-      - redis
+      - session-redis
+      - trial-cache-redis
 
 volumes:
   mysql-data:
   scylla_data:
   kafka-data:
-  redis-data:
+  session-redis-data:
+  trial-cache-redis-data:
+

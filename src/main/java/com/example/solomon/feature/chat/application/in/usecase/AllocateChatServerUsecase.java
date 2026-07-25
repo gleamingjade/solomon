@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AllocateChatServerUsecase {
 
-    private final ChatMessageSeqRepository chatMessageSeqRepository;
+//    private final ChatMessageSeqRepository chatMessageSeqRepository;
 
     public void allocate() {
         // 현재 서버 개수 조회

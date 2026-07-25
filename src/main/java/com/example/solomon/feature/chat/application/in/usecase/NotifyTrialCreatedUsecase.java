@@ -12,16 +12,16 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NotifyTrialCreatedUsecase {
-
-    private final TrialRepository trialRepository;
-
-    private final CreateChatMessageUsecase createChatMessageUsecase;
+//
+//    private final TrialRepository trialRepository;
+//
+//    private final CreateChatMessageUsecase createChatMessageUsecase;
 
     public void execute(UUID trialId) {
-        String nickname = trialRepository.findAllTrialMembersByTrialId(trialId).get(0).getNickname();
-
-        createChatMessageUsecase.execute(
-                new CreateChatMessageCommand(trialId, null, nickname + "came into play."));
+//        String nickname = trialRepository.findAllTrialMembersByTrialId(trialId).get(0).getNickname();
+//
+//        createChatMessageUsecase.execute(
+//                new CreateChatMessageCommand(trialId, null, nickname + "came into play."));
     }
 
 }
