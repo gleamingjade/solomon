@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1.02-create-table-trial" author="solomon">
+        <sql>
+            CREATE TABLE IF NOT EXISTS trial (
+                id BINARY(16) PRIMARY KEY,
+                issue_title VARCHAR(255) NOT NULL,
+                stage VARCHAR(255) NOT NULL,
+
+                last_message TEXT,
+                last_message_seq BIGINT,
+
+                created_at DATETIME NOT NULL,
+                updated_at DATETIME NOT NULL,
+
+                INDEX idx_updated_at (updated_at DESC)
+            );
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

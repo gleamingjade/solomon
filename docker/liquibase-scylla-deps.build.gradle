@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    resolvedDeps
+}
+
+dependencies {
+    resolvedDeps 'org.liquibase.ext:liquibase-cassandra:5.0.2'
+    resolvedDeps 'com.ing.data:cassandra-jdbc-wrapper:5.0.2'
+}
+
+tasks.register('copyDeps', Copy) {
+    from configurations.resolvedDeps
+    into layout.buildDirectory.dir('resolved-libs')
+}

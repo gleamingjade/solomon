@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1.01-create-table-member" author="solomon">
+        <sql>
+            CREATE TABLE IF NOT EXISTS member (
+                id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+                email VARCHAR(255) UNIQUE NOT NULL,
+                picture VARCHAR(255) NOT NULL,
+                role VARCHAR(255) NOT NULL,
+
+                balance INT NOT NULL,
+                last_free_awarded_at DATETIME NOT NULL,
+                last_ad_awarded_at DATETIME NOT NULL,
+
+                created_at DATETIME NOT NULL,
+                updated_at DATETIME NOT NULL
+            );
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

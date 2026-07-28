@@ -1,14 +1,13 @@
-package com.example.solomon.feature.trial.domain.exception;
+package com.example.solomon.feature.member.domain.exception;
 
 import com.example.solomon.common.domain.entity.exception.ExceptionInfo;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum TrialException implements ExceptionInfo {
+public enum MemberException implements ExceptionInfo {
 
-    ONGOING_TRIAL_EXISTS("ongoing trial exists."),
-    UNEXISTS_TRIAL("ongoing trial exists.");
+    UNEXISTS_MEMBER("unexists member.");
 
     private final String message;
 

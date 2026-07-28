@@ -3,7 +3,6 @@ package com.example.solomon.common.adapter.in.web.security.oauth;
 import com.example.solomon.feature.member.application.out.MemberRepository;
 import com.example.solomon.feature.member.domain.entity.Member;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
@@ -15,7 +14,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -24,33 +22,22 @@ public class SessionRedisOidcUserService extends OidcUserService {
 
     private final MemberRepository memberRepository;
 
+    public static final String ROLE_PREFIX = "ROLE_";
+
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         DefaultOidcUser oidcUser = (DefaultOidcUser) super.loadUser(userRequest);
 
-        String email = (String) oidcUser.getClaims().get("email");
-        String picture = (String) oidcUser.getClaims().getOrDefault("picture", "");
-
-        Member member = memberRepository.findByEmail(email)
-                .orElseGet(() -> memberRepository.save(Member.create(email, picture)));
-
-        Collection<GrantedAuthority> authorities = new ArrayList<>(List.of(
-                new SimpleGrantedAuthority("ROLE_" + member.getRole().name())));
+        Member member = memberRepository.findByEmail(oidcUser.getEmail())
+                .orElseGet(() -> memberRepository.save(Member.create(oidcUser.getEmail(), oidcUser.getPicture())));
 
         SessionMember sessionMember = new SessionMember(
-                String.valueOf(member.getId()), authorities, currentHttpSessionId());
+                String.valueOf(member.getId()),
+                new ArrayList<>(List.of(
+                        new SimpleGrantedAuthority(ROLE_PREFIX + member.getRole().name()))),
+                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest().getSession(true).getId());
 
         return new SessionRedisOidcUser(sessionMember);
-    }
-
-    private String currentHttpSessionId() {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        if (attributes == null) {
-            return null;
-        }
-
-        return attributes.getRequest().getSession(true).getId();
     }
 
 }

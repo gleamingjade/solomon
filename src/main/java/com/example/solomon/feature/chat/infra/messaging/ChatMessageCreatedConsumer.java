@@ -3,7 +3,7 @@ package com.example.solomon.feature.chat.infra.messaging;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import com.example.solomon.common.domain.entity.exception.DomainException;
+import com.example.solomon.common.domain.entity.exception.ApplicationException;
 import com.example.solomon.common.adapter.in.messaging.kafka.DebeziumEnvelope;
 import com.example.solomon.feature.trial.adapter.out.persistence.jpa.SpringDataJpaTrialRepository;
 import com.example.solomon.feature.trial.domain.entity.Trial;
@@ -34,7 +34,7 @@ public class ChatMessageCreatedConsumer {
         ChatMessageCreatedEvent event = ChatMessageCreatedEvent.from(envelope);
 
         trialRepository.findById(event.trialId())
-                .orElseThrow(() -> new DomainException(TrialException.UNEXISTS_TRIAL))
+                .orElseThrow(() -> new ApplicationException(TrialException.UNEXISTS_TRIAL))
                 .onNewChatMessage(event.content(), event.sequence());
     }
 }

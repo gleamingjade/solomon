@@ -6,8 +6,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
-import com.example.solomon.feature.trial.application.port.out.TrialRepository;
-import com.example.solomon.feature.trial.domain.entity.Stage;
+import com.example.solomon.feature.trial.application.out.TrialRepository;
 import com.example.solomon.feature.trial.domain.entity.Trial;
 import com.example.solomon.feature.trial.domain.entity.TrialMember;
 
@@ -31,8 +30,8 @@ public class SpringDataJpaTrialRepositoryAdapter implements TrialRepository {
     }
 
     @Override
-    public long countUnTerminatedTrialByMemberId(Long memberId, Stage stage) {
-        return jpaTrialRepository.countUnTerminatedTrialByMemberId(memberId, stage);
+    public long countUnTerminatedTrialByMemberId(Long memberId) {
+        return jpaTrialRepository.countUnTerminatedTrialByMemberId(memberId);
     }
 
     @Override

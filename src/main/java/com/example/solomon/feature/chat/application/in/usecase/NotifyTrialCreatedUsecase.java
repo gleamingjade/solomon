@@ -4,9 +4,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.example.solomon.feature.chat.application.in.usecase.dto.CreateChatMessageCommand;
-import com.example.solomon.feature.trial.application.port.out.TrialRepository;
-
 import lombok.RequiredArgsConstructor;
 
 @Service

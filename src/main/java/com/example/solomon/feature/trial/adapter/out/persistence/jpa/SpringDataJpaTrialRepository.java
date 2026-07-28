@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.example.solomon.feature.trial.domain.entity.Stage;
 import com.example.solomon.feature.trial.domain.entity.Trial;
 
 public interface SpringDataJpaTrialRepository extends JpaRepository<Trial, UUID> {
@@ -17,11 +16,9 @@ public interface SpringDataJpaTrialRepository extends JpaRepository<Trial, UUID>
                             from Trial tr
                             join tr.trialMembers tm
                             where tm.member.id = :memberId
-                              and tr.stage <> :stage
+                              and tr.stage <> 'TERMINATED'
                         """)
-        long countUnTerminatedTrialByMemberId(
-                        @Param("memberId") Long memberId,
-                        @Param("stage") Stage stage);
+        long countUnTerminatedTrialByMemberId(@Param("memberId") Long memberId);
 
         @Query("""
                             select distinct t

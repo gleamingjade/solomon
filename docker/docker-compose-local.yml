@@ -28,7 +28,27 @@ services:
       retries: 30
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./dbz.sql:/docker-entrypoint-initdb.d/dbz.sql
+      - ./create-debezium-user.sql:/docker-entrypoint-initdb.d/create-debezium-user.sql
+
+  # ========================
+  # Liquibase - MySQL Migration
+  # ========================
+  liquibase-mysql:
+    build:
+      context: .
+      dockerfile: liquibase-mysql.Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ../lbase/mysql:/liquibase/changelog
+    command:
+      - --url=jdbc:mysql://mysql:3306/localdb
+      - --username=localuser
+      - --password=localpass
+      - --driver=com.mysql.cj.jdbc.Driver
+      - --changeLogFile=db.changelog-master.xml
+      - update
 
   # ========================
   # Scylla
@@ -45,21 +65,40 @@ services:
       retries: 30    
     volumes:
           - scylla_data:/var/lib/scylla
-  
-  scylla-init:
+
+  scylla-keyspace-init:
     image: scylladb/scylla:2026.1.7
     depends_on:
       scylla:
         condition: service_healthy
-    volumes:
-      - ./init.cql:/init.cql:ro
     entrypoint:
       - /bin/sh
       - -c
       - |
-        echo "Initializing Scylla..."
-        cqlsh scylla 9042 -f /init.cql
+        echo "Creating keyspace..."
+        cqlsh scylla 9042 -e "CREATE KEYSPACE IF NOT EXISTS localscylla WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1': 1};"
         echo "Done."
+
+  # ========================
+  # Liquibase - ScyllaDB Migration
+  # ========================
+  liquibase-scylla:
+    build:
+      context: .
+      dockerfile: liquibase-scylla.Dockerfile
+    depends_on:
+      scylla:
+        condition: service_healthy
+      scylla-keyspace-init:
+        condition: service_completed_successfully
+    volumes:
+      - ../lbase/scylla:/liquibase/changelog
+    command:
+      - --url=jdbc:cassandra://scylla:9042/localscylla?localdatacenter=datacenter1
+      - --username=cassandra
+      - --password=cassandra
+      - --changeLogFile=db.changelog-scylla.xml
+      - update
 
   # ========================
   # Kafka
@@ -95,16 +134,16 @@ services:
   # ========================
   kafka-connect:
     build:
-          context: .
-          dockerfile: debezium-image.Dockerfile
+      context: .
+      dockerfile: debezium-image.Dockerfile
     ports:
       - "8083:8083"
     depends_on:
       kafka:
         condition: service_healthy
-      mysql:
-        condition: service_healthy
-      scylla-init:
+      liquibase-mysql:
+        condition: service_completed_successfully
+      liquibase-scylla:
         condition: service_completed_successfully
     environment:
       BOOTSTRAP_SERVERS: kafka:19092

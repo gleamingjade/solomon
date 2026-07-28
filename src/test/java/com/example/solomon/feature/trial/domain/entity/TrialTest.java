@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TrialTest {
 
     @Test
-    @DisplayName("should create a Trial with default values and an initial TrialMember")
+    @DisplayName("Should create a Trial with default values and an initial TrialMember")
     void create() {
         // given, when
         Member member = Member.create(
