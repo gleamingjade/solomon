@@ -9,3 +9,6 @@ There are plenty of async based feature. So we have to test them up to the way a
 
 * https://github.com/awaitility/awaitility/wiki/Usage#usage-examples
 
+음..근데 로컬은 그냥 컴포즈로 묶어서 쳐도 되는데 
+나중에 분리를 생각하면 별도의 컨테이너로 가야 겠는디
+

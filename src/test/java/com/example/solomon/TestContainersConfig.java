@@ -10,6 +10,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.images.builder.Transferable;
@@ -18,12 +19,15 @@ import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.mysql.MySQLContainer;
 import org.testcontainers.scylladb.ScyllaDBContainer;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,8 +80,8 @@ public class TestContainersConfig {
     // Scylla
     // ========================
     private static final String SCYLLA_NETWORK_ALIAS = "scylla";
-    private static final int SCYLLA_PORT = 9042;
-    private static final String SCYLLA_KEYSPACE = "localscylla";
+    public static final int SCYLLA_PORT = 9042;
+    public static final String SCYLLA_KEYSPACE = "localscylla";
     private static final String SCYLLA_CHAT_MESSAGE_TABLE = "chat_message";
     private static final String SCYLLA_CDC_TOPIC_PREFIX = "cdc-scylla";
 
@@ -88,8 +92,9 @@ public class TestContainersConfig {
             .withCommand("--smp", "1", "--memory", "2G")
             .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5)));
 
-    // In Scylla, the table must be created in advance before registering the source connector.
-    private static void initScyllaSchema() {
+    // The keyspace must exist before Liquibase can migrate into it, so it's created up front here
+    // (mirrors the "scylla-keyspace-init" step in docker-compose-local.yml).
+    private static void initScyllaKeyspace() {
         CqlSession session = CqlSession.builder()
                 .addContactPoint(new InetSocketAddress(SCYLLA.getHost(), SCYLLA.getMappedPort(SCYLLA_PORT)))
                 .withLocalDatacenter("datacenter1")
@@ -97,18 +102,6 @@ public class TestContainersConfig {
 
         session.execute("CREATE KEYSPACE IF NOT EXISTS " + SCYLLA_KEYSPACE + " WITH replication = "
                 + "{'class': 'NetworkTopologyStrategy', 'datacenter1': 1}");
-
-        session.execute("USE " + SCYLLA_KEYSPACE);
-
-        session.execute("""
-                CREATE TABLE IF NOT EXISTS %s (
-                    trial_id UUID,
-                    id UUID,
-                    member_id BIGINT,
-                    content TEXT,
-                    PRIMARY KEY (trial_id, id)
-                ) WITH cdc = {'enabled': true}
-                """.formatted(SCYLLA_CHAT_MESSAGE_TABLE));
 
         session.close();
     }
@@ -121,6 +114,49 @@ public class TestContainersConfig {
         System.setProperty("spring.cassandra.local-datacenter", "datacenter1");
         System.setProperty("spring.cassandra.schema-action", "none");
     }
+
+    // ========================
+    // Liquibase
+    // ========================
+    private static final Path PROJECT_ROOT = Paths.get(System.getProperty("user.dir"));
+
+    public static final GenericContainer<?> LIQUIBASE_MYSQL = new GenericContainer<>(
+            DockerImageName.parse("liquibase/liquibase:5.0.2"))
+            .withNetwork(NETWORK)
+            .dependsOn(MYSQL)
+            .withCopyFileToContainer(
+                    MountableFile.forHostPath(PROJECT_ROOT.resolve("lbase/mysql")),
+                    "/liquibase/changelog")
+            .withCopyFileToContainer(
+                    MountableFile.forHostPath(PROJECT_ROOT.resolve("build/liquibase-drivers/mysql")),
+                    "/liquibase/lib")
+            .withCommand(
+                    "--url=jdbc:mysql://" + MYSQL_NETWORK_ALIAS + ":" + MYSQL_PORT + "/" + MYSQL_DATABASE,
+                    "--username=" + MYSQL_USERNAME,
+                    "--password=" + MYSQL_PASSWORD,
+                    "--driver=com.mysql.cj.jdbc.Driver",
+                    "--changeLogFile=db.changelog-master.xml",
+                    "update")
+            .withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofMinutes(5)));
+
+    public static final GenericContainer<?> LIQUIBASE_SCYLLA = new GenericContainer<>(
+            DockerImageName.parse("liquibase/liquibase:5.0.2"))
+            .withNetwork(NETWORK)
+            .dependsOn(SCYLLA)
+            .withCopyFileToContainer(
+                    MountableFile.forHostPath(PROJECT_ROOT.resolve("lbase/scylla")),
+                    "/liquibase/changelog")
+            .withCopyFileToContainer(
+                    MountableFile.forHostPath(PROJECT_ROOT.resolve("build/liquibase-drivers/scylla")),
+                    "/liquibase/lib")
+            .withCommand(
+                    "--url=jdbc:cassandra://" + SCYLLA_NETWORK_ALIAS + ":" + SCYLLA_PORT + "/" + SCYLLA_KEYSPACE
+                            + "?localdatacenter=datacenter1",
+                    "--username=cassandra",
+                    "--password=cassandra",
+                    "--changeLogFile=db.changelog-scylla.xml",
+                    "update")
+            .withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofMinutes(5)));
 
     // ========================
     // Kafka
@@ -166,7 +202,7 @@ public class TestContainersConfig {
     // ========================
     // Debezium
     // ========================
-    private static final int DEBEZIUM_PORT = 8083;
+    public static final int DEBEZIUM_PORT = 8083;
     private static final String MYSQL_CONNECTOR_NAME = "mysql-source-connector";
     private static final String SCYLLA_CONNECTOR_NAME = "scylla-source-connector";
 
@@ -203,9 +239,13 @@ public class TestContainersConfig {
 
         // I said that it is impossible for Scylla to register Scylla source connector in advance without schema.
         // And the library 'spring-boot-testcontainers' i'm using does not support @ServiceConnection for Scylla.
-        initScyllaSchema();
+        initScyllaKeyspace();
         initScyllaProperties();
         initRedisProperties();
+
+        // Migrations must finish before Debezium registers connectors against the migrated tables.
+        LIQUIBASE_MYSQL.start();
+        LIQUIBASE_SCYLLA.start();
 
         DEBEZIUM.start();
     }

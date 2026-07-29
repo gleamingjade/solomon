@@ -17,6 +17,11 @@ repositories {
 	mavenCentral()
 }
 
+configurations {
+	liquibaseMysqlDriver
+	liquibaseScyllaDriver
+}
+
 dependencies {
 	implementation 'com.github.f4b6a3:uuid-creator:6.1.0'
 
@@ -46,10 +51,26 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 
 	testImplementation 'org.instancio:instancio-junit:6.0.0-RC2'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	liquibaseMysqlDriver 'com.mysql:mysql-connector-j:8.0.32'
+	liquibaseScyllaDriver 'org.liquibase.ext:liquibase-cassandra:5.0.2'
+	liquibaseScyllaDriver 'com.ing.data:cassandra-jdbc-wrapper:5.0.2'
+}
+
+tasks.register('resolveLiquibaseMysqlDrivers', Copy) {
+	from configurations.liquibaseMysqlDriver
+	into layout.buildDirectory.dir('liquibase-drivers/mysql')
+}
+
+tasks.register('resolveLiquibaseScyllaDrivers', Copy) {
+	from configurations.liquibaseScyllaDriver
+	into layout.buildDirectory.dir('liquibase-drivers/scylla')
 }
 
 tasks.named('test') {
+	dependsOn resolveLiquibaseMysqlDrivers, resolveLiquibaseScyllaDrivers
 	useJUnitPlatform()
 }

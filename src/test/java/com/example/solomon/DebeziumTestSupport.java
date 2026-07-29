@@ -7,6 +7,8 @@ import java.net.http.HttpResponse;
 
 import org.testcontainers.containers.GenericContainer;
 
+import static com.example.solomon.TestContainersConfig.DEBEZIUM_PORT;
+
 public class DebeziumTestSupport {
 
     private static final String CONNECTORS_PATH = "/connectors";
@@ -22,7 +24,7 @@ public class DebeziumTestSupport {
     }
 
     private String baseUrl() {
-        return "http://" + debezium.getHost() + ":" + debezium.getMappedPort(8083);
+        return "http://" + debezium.getHost() + ":" + debezium.getMappedPort(DEBEZIUM_PORT);
     }
 
     private String connectorPath(String name) {

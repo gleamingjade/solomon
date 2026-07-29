@@ -32,7 +32,7 @@ public class KafkaTestSupport {
 
             return Awaitility.await()
                     .atMost(Duration.ofSeconds(120))
-                    .pollInterval(Duration.ofMillis(500))
+                    .pollInterval(Duration.ZERO)
                     .until(() -> consumer.poll(Duration.ofMillis(200)),
                             records -> !records.isEmpty());
         }
