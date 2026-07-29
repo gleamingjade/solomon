@@ -8,10 +8,10 @@
     "database.password": "dbz",
     "database.server.id": "123456",
     "topic.prefix": "cdc-mysql",
-    "database.include.list": "localdb",
-    "table.include.list": "localdb.trial",
+    "database.include.list": "localmysql",
+    "table.include.list": "localmysql.trial",
     "include.schema.changes": "true",
     "schema.history.internal.kafka.bootstrap.servers": "kafka:19092",
-    "schema.history.internal.kafka.topic": "schema-changes.localdb"
+    "schema.history.internal.kafka.topic": "schema-changes.localmysql"
   }
 }

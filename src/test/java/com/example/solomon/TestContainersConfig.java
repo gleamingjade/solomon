@@ -41,9 +41,9 @@ public class TestContainersConfig {
     // ========================
     private static final String MYSQL_NETWORK_ALIAS = "mysql";
     private static final int MYSQL_PORT = 3306;
-    public static final String MYSQL_DATABASE = "local-mysql";
-    private static final String MYSQL_USERNAME = "local-user";
-    private static final String MYSQL_PASSWORD = "local-pass";
+    public static final String MYSQL_DATABASE = "localmysql";
+    private static final String MYSQL_USERNAME = "localuser";
+    private static final String MYSQL_PASSWORD = "localpass";
     public static final String MYSQL_TRIAL_TABLE = "trial";
     public static final String MYSQL_CDC_TOPIC_PREFIX = "cdc-mysql";
 
@@ -77,8 +77,6 @@ public class TestContainersConfig {
     // ========================
     private static final String SCYLLA_NETWORK_ALIAS = "scylla";
     private static final int SCYLLA_PORT = 9042;
-    // No hyphen here: Cassandra/Scylla keyspace names only allow letters, digits and
-    // underscores, so "local-scylla" would fail with an invalid keyspace name error.
     private static final String SCYLLA_KEYSPACE = "localscylla";
     private static final String SCYLLA_CHAT_MESSAGE_TABLE = "chat_message";
     private static final String SCYLLA_CDC_TOPIC_PREFIX = "cdc-scylla";
