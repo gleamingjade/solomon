@@ -21,6 +21,8 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Trial extends UuidBaseEntity {
 
+    public static final String AGGREGATE_TYPE = "Trial";
+
     @Column(nullable = false)
     private String issueTitle;
 

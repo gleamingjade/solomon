@@ -18,6 +18,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
 
 import com.example.solomon.common.adapter.in.messaging.kafka.DebeziumEnvelope;
+import com.example.solomon.feature.trial.domain.event.TrialCreatedEvent;
 
 // Referenced by https://docs.spring.io/spring-kafka/reference/kafka/container-factory.html
 @Configuration
@@ -42,16 +43,16 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, DebeziumEnvelope> trialCreatedConsumerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, TrialCreatedEvent> trialCreatedConsumerFactory() {
         Map<String, Object> props = getBaseProps();
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "trial-created-topic-consumer");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "trial-created-event-consumer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 
-        DefaultKafkaConsumerFactory<String, DebeziumEnvelope> consumerFactory = new DefaultKafkaConsumerFactory<>(props,
-                new StringDeserializer(), new JsonDeserializer<>(DebeziumEnvelope.class, false));
+        DefaultKafkaConsumerFactory<String, TrialCreatedEvent> consumerFactory = new DefaultKafkaConsumerFactory<>(props,
+                new StringDeserializer(), new JsonDeserializer<>(TrialCreatedEvent.class, false));
 
-        ConcurrentKafkaListenerContainerFactory<String, DebeziumEnvelope> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, TrialCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
 
         // If processing fails, the error record is automatically published to the

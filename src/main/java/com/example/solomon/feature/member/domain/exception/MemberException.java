@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum MemberException implements ExceptionInfo {
 
-    UNEXISTS_MEMBER("unexists member.");
+    UNEXISTS_MEMBER("Unexists member.");
 
     private final String message;
 

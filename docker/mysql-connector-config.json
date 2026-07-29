@@ -9,7 +9,7 @@
     "database.server.id": "123456",
     "topic.prefix": "cdc-mysql",
     "database.include.list": "localmysql",
-    "table.include.list": "localmysql.trial",
+    "table.include.list": "localmysql.outbox",
     "include.schema.changes": "true",
     "schema.history.internal.kafka.bootstrap.servers": "kafka:19092",
     "schema.history.internal.kafka.topic": "schema-changes.localmysql"

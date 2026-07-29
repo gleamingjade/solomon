@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1.04-create-table-outbox" author="solomon">
+        <sql>
+            CREATE TABLE IF NOT EXISTS outbox (
+                id BINARY(16) PRIMARY KEY,
+                aggregate_type VARCHAR(255) NOT NULL,
+                aggregate_id VARCHAR(255) NOT NULL,
+                event_type VARCHAR(255) NOT NULL,
+                payload JSON NOT NULL,
+
+                created_at DATETIME NOT NULL,
+                updated_at DATETIME NOT NULL,
+
+                INDEX idx_aggregate_type_id (aggregate_type, aggregate_id)
+            );
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

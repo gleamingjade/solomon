@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.example.solomon.common.domain.entity.exception.ApplicationException;
 import com.example.solomon.common.adapter.in.messaging.kafka.DebeziumEnvelope;
+import com.example.solomon.common.adapter.in.messaging.kafka.KafkaTopics;
 import com.example.solomon.feature.trial.adapter.out.persistence.jpa.SpringDataJpaTrialRepository;
 import com.example.solomon.feature.trial.domain.entity.Trial;
 import com.example.solomon.feature.trial.domain.exception.TrialException;
@@ -17,19 +18,19 @@ public class ChatMessageCreatedConsumer {
 
     SpringDataJpaTrialRepository trialRepository;
 
-    @KafkaListener(topics = "cdc-scylla.localscylla.chat_message", containerFactory = "chatMessageCreatedConsumerFactory")
+    @KafkaListener(topics = KafkaTopics.CDC_SCYLLA_CHAT_MESSAGE, containerFactory = "chatMessageCreatedConsumerFactory")
     public void consume(DebeziumEnvelope envelope) {
         ChatMessageCreatedEvent event = ChatMessageCreatedEvent.from(envelope);
 
 
     }
 
-    @KafkaListener(topics = "cdc-scylla.localscylla.chat_message", groupId = "websocket-fanout")
+    @KafkaListener(topics = KafkaTopics.CDC_SCYLLA_CHAT_MESSAGE, groupId = "websocket-fanout")
     public void fanout(DebeziumEnvelope envelope) {
 
     }
 
-    @KafkaListener(topics = "cdc-scylla.localscylla.chat_message", groupId = "chat-db-updater")
+    @KafkaListener(topics = KafkaTopics.CDC_SCYLLA_CHAT_MESSAGE, groupId = "chat-db-updater")
     public void updateDb(DebeziumEnvelope envelope) {
         ChatMessageCreatedEvent event = ChatMessageCreatedEvent.from(envelope);
 

@@ -20,6 +20,8 @@ import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
 import com.example.solomon.common.adapter.in.messaging.kafka.DebeziumEnvelope;
+import com.example.solomon.common.adapter.in.messaging.kafka.KafkaTopics;
+import com.example.solomon.feature.trial.domain.event.TrialCreatedEvent;
 
 // Referenced by https://docs.spring.io/spring-kafka/reference/streams.html#kafka-streams-example
 @Configuration
@@ -51,21 +53,22 @@ public class KafkaStreamsConfig {
                         @Qualifier("cdcStreamsBuilder") StreamsBuilder streamsBuilder) {
                 JsonSerde<DebeziumEnvelope> debeziumSerde = new JsonSerde<>(DebeziumEnvelope.class);
 
-                KStream<String, DebeziumEnvelope> stream = streamsBuilder.stream("cdc-mysql.localdb.trial",
+                KStream<String, DebeziumEnvelope> stream = streamsBuilder.stream(KafkaTopics.CDC_MYSQL_OUTBOX,
                                 Consumed.with(Serdes.String(), debeziumSerde))
-                                .filter((key, envelope) -> envelope != null && envelope.payload() != null);
+                                .filter((key, envelope) -> envelope != null && envelope.payload() != null
+                                                && envelope.payload().after() != null);
 
                 stream.split()
                                 .branch(
-                                                (key, envelope) -> envelope.payload().op() != null
-                                                                && "c".equals(envelope.payload().op()),
-                                                Branched.withConsumer(ks -> ks.to("cdc-mysql.localdb.trial-created",
-                                                                Produced.with(Serdes.String(), debeziumSerde))))
-                                .branch(
-                                                (key, envelope) -> envelope.payload().op() != null
-                                                                && "u".equals(envelope.payload().op()),
-                                                Branched.withConsumer(ks -> ks.to("cdc-mysql.localdb.trial-updated",
-                                                                Produced.with(Serdes.String(), debeziumSerde))));
+                                                (key, envelope) -> TrialCreatedEvent.EVENT_TYPE
+                                                                .equals(envelope.getValFromAfter("event_type").asText()),
+                                                Branched.withConsumer(ks -> ks
+                                                                .selectKey((key, envelope) -> envelope
+                                                                                .getValFromAfter("aggregate_id").asText())
+                                                                .mapValues(envelope -> envelope
+                                                                                .getValFromAfter("payload").asText())
+                                                                .to(KafkaTopics.TRIAL_CREATED_EVENT,
+                                                                                Produced.with(Serdes.String(), Serdes.String()))));
                 return stream;
         }
 
