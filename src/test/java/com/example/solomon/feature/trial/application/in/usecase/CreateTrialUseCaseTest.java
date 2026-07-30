@@ -1,38 +1,37 @@
 package com.example.solomon.feature.trial.application.in.usecase;
 
-import com.example.solomon.KafkaTestSupport;
 import com.example.solomon.SlicedSpringContextTest;
 import com.example.solomon.TestContainersConfig;
-import com.example.solomon.TestDataCleanupExtension;
+import com.example.solomon.common.adapter.out.persistence.jpa.SpringDataJpaOutboxRepository;
+import com.example.solomon.common.adapter.out.persistence.jpa.SpringDataJpaOutboxRepositoryAdapter;
 import com.example.solomon.common.adapter.out.persistence.jpa.config.JpaConfig;
+import com.example.solomon.common.application.out.OutboxRepository;
+import com.example.solomon.common.util.JsonUtils;
 import com.example.solomon.feature.member.adapter.out.persistence.jpa.SpringDataJpaMemberRepositoryAdapter;
 import com.example.solomon.feature.member.application.out.MemberRepository;
 import com.example.solomon.feature.member.domain.entity.Member;
 import com.example.solomon.feature.trial.adapter.out.persistence.jpa.SpringDataJpaTrialRepositoryAdapter;
 import com.example.solomon.feature.trial.application.in.usecase.dto.CreateTrialCommand;
 import com.example.solomon.feature.trial.application.out.TrialRepository;
-import lombok.extern.slf4j.Slf4j;
+import com.example.solomon.feature.trial.domain.entity.Trial;
+import com.example.solomon.feature.trial.domain.event.TrialCreatedEvent;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.transaction.TestTransaction;
+
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@Slf4j
 @SlicedSpringContextTest
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({TestContainersConfig.class, JpaConfig.class, SpringDataJpaMemberRepositoryAdapter.class, SpringDataJpaTrialRepositoryAdapter.class})
-@ExtendWith(TestDataCleanupExtension.class)
+@Import({TestContainersConfig.class, JpaConfig.class, SpringDataJpaMemberRepositoryAdapter.class,
+        SpringDataJpaTrialRepositoryAdapter.class, SpringDataJpaOutboxRepositoryAdapter.class})
 class CreateTrialUseCaseTest {
-
-    @Autowired
-    private KafkaTestSupport kafkaTestSupport;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -40,29 +39,33 @@ class CreateTrialUseCaseTest {
     @Autowired
     private TrialRepository trialRepository;
 
+    @Autowired
+    private OutboxRepository outboxRepository;
+
+    @Autowired
+    private SpringDataJpaOutboxRepository springDataJpaOutboxRepository;
+
     @Test
     void testCreateTrialUseCase() {
-        CreateTrialUseCase createTrialUseCase = new CreateTrialUseCase(trialRepository, memberRepository);
+        CreateTrialUseCase createTrialUseCase = new CreateTrialUseCase(trialRepository, memberRepository, outboxRepository);
 
         // Given
         Member m = memberRepository.save(Member.create("email", "picture"));
 
         // When
-        createTrialUseCase.execute(new CreateTrialCommand(m.getId(), "issueTitle", "nickname"));
-
-        // Debezium only sees committed binlog events, so force a commit here before polling Kafka
-        // instead of relying on @DataJpaTest's default end-of-test rollback.
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
+        String trialId = createTrialUseCase.execute(new CreateTrialCommand(m.getId(), "issueTitle", "nickname"));
 
         // Then
-        assertThat(kafkaTestSupport.pollRecords(TestContainersConfig.MYSQL_CDC_TOPIC_PREFIX
-                + "." + TestContainersConfig.MYSQL_DATABASE
-                + "." + TestContainersConfig.MYSQL_TRIAL_TABLE)).anyMatch(record -> {
-            log.info(record.value());
-            return record.value().contains("\"issue_title\":\"issueTitle\"");
+        assertThat(springDataJpaOutboxRepository.findAll()).anySatisfy(outbox -> {
+            assertThat(outbox.getAggregateType()).isEqualTo(Trial.AGGREGATE_TYPE);
+            assertThat(outbox.getAggregateId()).isEqualTo(trialId);
+            assertThat(outbox.getEventType()).isEqualTo(TrialCreatedEvent.EVENT_TYPE);
+
+            TrialCreatedEvent event = JsonUtils.readValue(outbox.getPayload(), TrialCreatedEvent.class);
+            assertThat(event.trialId()).isEqualTo(UUID.fromString(trialId));
+            assertThat(event.memberId()).isEqualTo(m.getId());
+            assertThat(event.nickname()).isEqualTo("nickname");
         });
     }
-
 
 }

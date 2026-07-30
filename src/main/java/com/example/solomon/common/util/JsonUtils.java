@@ -18,4 +18,12 @@ public final class JsonUtils {
         }
     }
 
+    public static <T> T readValue(String json, Class<T> type) {
+        try {
+            return OBJECT_MAPPER.readValue(json, type);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
 }

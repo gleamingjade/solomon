@@ -1,4 +1,4 @@
-package com.example.solomon.common.adapter.in.messaging.kafka;
+package com.example.solomon.common.adapter.in.messaging.kafka.config;
 
 public final class KafkaTopics {
 

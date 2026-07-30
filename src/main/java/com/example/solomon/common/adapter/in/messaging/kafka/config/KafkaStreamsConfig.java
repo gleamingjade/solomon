@@ -20,7 +20,6 @@ import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
 import com.example.solomon.common.adapter.in.messaging.kafka.DebeziumEnvelope;
-import com.example.solomon.common.adapter.in.messaging.kafka.KafkaTopics;
 import com.example.solomon.feature.trial.domain.event.TrialCreatedEvent;
 
 // Referenced by https://docs.spring.io/spring-kafka/reference/streams.html#kafka-streams-example

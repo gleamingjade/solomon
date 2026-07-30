@@ -39,11 +39,12 @@ public class CreateTrialUseCase {
 
         Trial trial = trialRepository.save(Trial.create(member, command.issueTitle(), command.nickname()));
 
-        outboxRepository.save(Outbox.create(
-                Trial.AGGREGATE_TYPE,
-                trial.getId().toString(),
-                TrialCreatedEvent.EVENT_TYPE,
-                JsonUtils.writeValueAsString(new TrialCreatedEvent(trial.getId(), member.getId(), command.nickname()))));
+        outboxRepository.save(
+                Outbox.create(
+                        Trial.AGGREGATE_TYPE,
+                        trial.getId().toString(),
+                        TrialCreatedEvent.EVENT_TYPE,
+                        JsonUtils.writeValueAsString(new TrialCreatedEvent(trial.getId(), member.getId(), command.nickname()))));
 
         return trial.getId().toString();
     }
