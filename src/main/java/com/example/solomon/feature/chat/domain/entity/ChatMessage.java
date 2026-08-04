@@ -27,8 +27,10 @@ public class ChatMessage {
 
     private String content;
 
-    public static ChatMessage create(UUID trialId, Long memberId, Long sequence, String content) {
-        return new ChatMessage(ChatMessageKey.create(trialId), memberId, sequence, content);
+    private MessageType type;
+
+    public static ChatMessage create(UUID trialId, Long memberId, Long sequence, String content, MessageType type) {
+        return new ChatMessage(ChatMessageKey.create(trialId), memberId, sequence, content, type);
     }
 
 }

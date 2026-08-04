@@ -1,6 +1,6 @@
 package com.example.solomon.feature.member.domain.exception;
 
-import com.example.solomon.common.domain.entity.exception.ExceptionInfo;
+import com.example.solomon.common.domain.exception.ExceptionInfo;
 
 import lombok.RequiredArgsConstructor;
 

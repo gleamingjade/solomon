@@ -12,6 +12,7 @@
                 id UUID,
                 member_id BIGINT,
                 content TEXT,
+                type TEXT,
                 PRIMARY KEY (trial_id, id)
             ) WITH cdc = {'enabled': true};
         </sql>

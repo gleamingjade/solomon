@@ -24,7 +24,7 @@ public class TrialCacheRedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, String> chatMessageSeqRedisTemplate(
+    public RedisTemplate<String, String> trialCacheRedisTemplate(
             @Qualifier("trialCacheRedisConnectionFactory") RedisConnectionFactory factory) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
 

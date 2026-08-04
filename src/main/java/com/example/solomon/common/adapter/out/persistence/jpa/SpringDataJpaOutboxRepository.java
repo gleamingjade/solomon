@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.solomon.common.domain.entity.Outbox;
+import com.example.solomon.common.domain.entity.jpa.Outbox;
 
 public interface SpringDataJpaOutboxRepository extends JpaRepository<Outbox, UUID> {
 }

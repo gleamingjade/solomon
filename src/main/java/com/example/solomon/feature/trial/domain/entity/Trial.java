@@ -3,9 +3,11 @@ package com.example.solomon.feature.trial.domain.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.solomon.common.domain.entity.UuidBaseEntity;
+import com.example.solomon.common.domain.entity.jpa.UuidBaseEntity;
+import com.example.solomon.common.domain.exception.BusinessException;
 import com.example.solomon.feature.member.domain.entity.Member;
 
+import com.example.solomon.feature.trial.domain.exception.TrialException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,6 +53,20 @@ public class Trial extends UuidBaseEntity {
     public void onNewChatMessage(String lastMessage, Long lastMessageSeq) {
         this.lastMessage = lastMessage;
         this.lastMessageSeq = lastMessageSeq;
+    }
+
+    private void validateIfJoinable(String nickname) {
+        if (trialMembers.size() != 1) {
+            throw new BusinessException(TrialException.CAPACITY_EXCEEDED);
+        } else if (trialMembers.stream().anyMatch((tm) -> tm.getNickname().equals(nickname))) {
+            throw new BusinessException(TrialException.DUPLICATED_NICKNAME);
+        }
+    }
+
+    public void join(Member member, String nickname) {
+        validateIfJoinable(nickname);
+        TrialMember tm = TrialMember.create(this, member, nickname);
+        this.trialMembers.add(tm);
     }
 
 }

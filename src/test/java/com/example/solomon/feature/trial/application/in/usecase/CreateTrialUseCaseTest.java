@@ -3,14 +3,14 @@ package com.example.solomon.feature.trial.application.in.usecase;
 import com.example.solomon.SlicedSpringContextTest;
 import com.example.solomon.TestContainersConfig;
 import com.example.solomon.common.adapter.out.persistence.jpa.SpringDataJpaOutboxRepository;
-import com.example.solomon.common.adapter.out.persistence.jpa.SpringDataJpaOutboxRepositoryAdapter;
+import com.example.solomon.common.adapter.out.persistence.OutboxRepositoryAdapter;
 import com.example.solomon.common.adapter.out.persistence.jpa.config.JpaConfig;
 import com.example.solomon.common.application.out.OutboxRepository;
 import com.example.solomon.common.util.JsonUtils;
 import com.example.solomon.feature.member.adapter.out.persistence.jpa.SpringDataJpaMemberRepositoryAdapter;
 import com.example.solomon.feature.member.application.out.MemberRepository;
 import com.example.solomon.feature.member.domain.entity.Member;
-import com.example.solomon.feature.trial.adapter.out.persistence.jpa.SpringDataJpaTrialRepositoryAdapter;
+import com.example.solomon.feature.trial.adapter.out.persistence.TrialRepositoryAdapter;
 import com.example.solomon.feature.trial.application.in.usecase.dto.CreateTrialCommand;
 import com.example.solomon.feature.trial.application.out.TrialRepository;
 import com.example.solomon.feature.trial.domain.entity.Trial;
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @ActiveProfiles("test")
 @Import({TestContainersConfig.class, JpaConfig.class, SpringDataJpaMemberRepositoryAdapter.class,
-        SpringDataJpaTrialRepositoryAdapter.class, SpringDataJpaOutboxRepositoryAdapter.class})
+        TrialRepositoryAdapter.class, OutboxRepositoryAdapter.class})
 class CreateTrialUseCaseTest {
 
     @Autowired

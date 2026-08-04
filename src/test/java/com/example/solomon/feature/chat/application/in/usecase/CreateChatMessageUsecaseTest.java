@@ -7,6 +7,7 @@ import com.example.solomon.KafkaTestSupport;
 import com.example.solomon.SlicedSpringContextTest;
 import com.example.solomon.TestContainersConfig;
 import com.example.solomon.feature.chat.application.in.usecase.dto.CreateChatMessageCommand;
+import com.example.solomon.feature.chat.domain.entity.MessageType;
 import com.github.f4b6a3.uuid.UuidCreator;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ class CreateChatMessageUsecaseTest {
 
     @Test
     void testCreateChatMessageUsecase() throws InterruptedException {
-        CreateChatMessageCommand command = new CreateChatMessageCommand(UuidCreator.getTimeOrderedEpoch(), 1L, "test");
+        CreateChatMessageCommand command = new CreateChatMessageCommand(UuidCreator.getTimeOrderedEpoch(), 1L, "test", MessageType.USER);
 
         createChatMessageUsecase.execute(command);
 
