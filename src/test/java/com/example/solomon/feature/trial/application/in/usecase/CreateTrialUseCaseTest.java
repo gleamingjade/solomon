@@ -37,18 +37,13 @@ class CreateTrialUseCaseTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private TrialRepository trialRepository;
-
-    @Autowired
-    private OutboxRepository outboxRepository;
-
-    @Autowired
     private SpringDataJpaOutboxRepository springDataJpaOutboxRepository;
+
+    @Autowired
+    private  CreateTrialUseCase createTrialUseCase;
 
     @Test
     void testCreateTrialUseCase() {
-        CreateTrialUseCase createTrialUseCase = new CreateTrialUseCase(trialRepository, memberRepository, outboxRepository);
-
         // Given
         Member m = memberRepository.save(Member.create("email", "picture"));
 

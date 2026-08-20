@@ -16,7 +16,10 @@ public class Member extends IdBaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column
+    private String password;
+
+    @Column
     private String picture;
 
     @Enumerated(EnumType.STRING)
@@ -37,6 +40,20 @@ public class Member extends IdBaseEntity {
 
         m.email = email;
         m.picture = picture;
+        m.role = MemberRole.FREE;
+
+        m.balance = 1;
+        m.lastFreeAwardedAt = LocalDateTime.now();
+        m.lastAdAwardedAt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
+
+        return m;
+    }
+
+    public static Member createByEmail(String email, String encodedPassword) {
+        Member m = new Member();
+
+        m.email = email;
+        m.password = encodedPassword;
         m.role = MemberRole.FREE;
 
         m.balance = 1;

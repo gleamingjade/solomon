@@ -1,7 +1,4 @@
 # Kafka & CDC
-
-Notes for future maintenance — just enough to jog my memory, not a deep dive.
-
 ## CDC (Change Data Capture)
 
 A technique that reads a database's **commit log (binlog/WAL) directly** and streams out the actual committed changes as events.

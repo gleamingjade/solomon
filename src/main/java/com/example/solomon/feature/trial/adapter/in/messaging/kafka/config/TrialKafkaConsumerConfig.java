@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 
 import com.example.solomon.common.adapter.in.messaging.kafka.config.KafkaConsumerFactorySupport;
-import com.example.solomon.feature.chat.adapter.in.messaging.kafka.config.ChatKafkaTopics;
+import com.example.solomon.feature.chat.adapter.in.messaging.kafka.config.ChatKafkaTopicConfig;
 import com.example.solomon.feature.chat.domain.event.ChatMessageCreatedEvent;
 
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class TrialKafkaConsumerConfig {
     public ConcurrentKafkaListenerContainerFactory<String, ChatMessageCreatedEvent> chatMessageCreatedEventTrialConsumerFactory() {
         return factorySupport.buildFactory(
                 ChatMessageCreatedEvent.class,
-                ChatKafkaTopics.CHAT_MESSAGE_CREATED_EVENT + "-trial-consumer",
+                ChatKafkaTopicConfig.CHAT_MESSAGE_CREATED_EVENT + "-trial-consumer",
                 "chat-message-created-event (trial)");
     }
 

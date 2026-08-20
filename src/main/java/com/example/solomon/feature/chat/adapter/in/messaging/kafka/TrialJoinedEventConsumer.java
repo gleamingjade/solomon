@@ -3,7 +3,7 @@ package com.example.solomon.feature.chat.adapter.in.messaging.kafka;
 import com.example.solomon.feature.chat.application.in.usecase.CreateChatMessageUsecase;
 import com.example.solomon.feature.chat.application.in.usecase.dto.CreateChatMessageCommand;
 import com.example.solomon.feature.chat.domain.entity.MessageType;
-import com.example.solomon.feature.trial.adapter.in.messaging.kafka.config.TrialKafkaTopics;
+import com.example.solomon.feature.trial.adapter.in.messaging.kafka.config.TrialKafkaTopicConfig;
 import com.example.solomon.feature.trial.domain.event.TrialJoinedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,7 +17,7 @@ public class TrialJoinedEventConsumer {
 
     private final CreateChatMessageUsecase createChatMessageUsecase;
 
-    @KafkaListener(topics = TrialKafkaTopics.TRIAL_JOINED_EVENT, containerFactory = "trialJoinedEventConsumerFactory")
+    @KafkaListener(topics = TrialKafkaTopicConfig.TRIAL_JOINED_EVENT, containerFactory = "trialJoinedEventConsumerFactory")
     public void consume(TrialJoinedEvent event) {
         createChatMessageUsecase.execute(List.of(
                 new CreateChatMessageCommand(
@@ -28,7 +28,7 @@ public class TrialJoinedEventConsumer {
                 new CreateChatMessageCommand(
                         event.trialId(),
                         null,
-                        "Everybody came up, Please press the ready button below if you're ready to start",
+                        "Everybody came up, please press the ready button below if you're ready to start",
                         MessageType.SYSTEM_MESSAGE_READY_REQUEST)));
     }
 

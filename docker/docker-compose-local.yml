@@ -22,7 +22,7 @@ services:
       - --binlog-row-image=FULL
       - --binlog-expire-logs-seconds=604800
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpass"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-prootpass"]
       interval: 5s
       timeout: 3s
       retries: 30
@@ -43,7 +43,7 @@ services:
     volumes:
       - ../lbase/mysql:/liquibase/changelog
     command:
-      - --url=jdbc:mysql://mysql:3306/localdb
+      - --url=jdbc:mysql://mysql:3306/localmysql
       - --username=localuser
       - --password=localpass
       - --driver=com.mysql.cj.jdbc.Driver
@@ -120,7 +120,12 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # We run Kafka Streams (see ChatKafkaStreamsConfig, TrialKafkaStreamsConfig) against the CDC
+      # topics, and Streams treats a missing source topic on startup as fatal (no retry - see
+      # KafkaTopicConfig / *KafkaTopicConfig). Topics must exist before anyone produces or
+      # consumes, so both the broker and Kafka Connect (below) are told not to create them
+      # implicitly; every topic is declared as a NewTopic bean instead.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
     healthcheck:
       test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka:19092"]
       interval: 5s
@@ -157,7 +162,10 @@ services:
       KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
-      CONNECT_TOPIC_CREATION_ENABLE: "true"
+      # See the comment on KAFKA_AUTO_CREATE_TOPICS_ENABLE above - CDC topics are provisioned
+      # ahead of time via NewTopic beans, not created lazily when a connector first produces to
+      # them.
+      CONNECT_TOPIC_CREATION_ENABLE: "false"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/"]
       interval: 5s
@@ -264,6 +272,23 @@ services:
     depends_on:
       - session-redis
       - trial-cache-redis
+
+  # ========================
+  # Webdis
+  # ========================
+  webdis:
+    image: nicolas/webdis:latest
+    ports:
+      - "7379:7379"
+    environment:
+      - REDIS_HOST=trial-cache-redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./webdis.json:/etc/webdis.new.json
+    command: ["/usr/local/bin/webdis", "/etc/webdis.new.json"]
+    depends_on:
+      trial-cache-redis:
+        condition: service_healthy
 
 volumes:
   mysql-data:

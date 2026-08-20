@@ -89,10 +89,6 @@ public class KafkaConsumerFactorySupport {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 
-        // Wrapping in ErrorHandlingDeserializer means a malformed record's deserialization
-        // failure surfaces as a DeserializationException routed through the same
-        // CommonErrorHandler below (DLT etc.), instead of raw JsonDeserializer throwing inside
-        // poll() and potentially killing the whole container.
         DefaultKafkaConsumerFactory<String, T> consumerFactory = new DefaultKafkaConsumerFactory<>(props,
                 new StringDeserializer(),
                 new ErrorHandlingDeserializer<>(new JsonDeserializer<>(valueType, false)));

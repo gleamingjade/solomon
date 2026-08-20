@@ -12,8 +12,6 @@
     "table.include.list": "localmysql.outbox",
     "include.schema.changes": "true",
     "schema.history.internal.kafka.bootstrap.servers": "kafka:19092",
-    "schema.history.internal.kafka.topic": "schema-changes.localmysql",
-    "topic.creation.default.partitions": "2",
-    "topic.creation.default.replication.factor": "1"
+    "schema.history.internal.kafka.topic": "schema-changes.localmysql"
   }
 }

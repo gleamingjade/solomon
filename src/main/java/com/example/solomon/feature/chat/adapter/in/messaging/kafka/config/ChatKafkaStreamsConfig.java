@@ -27,7 +27,7 @@ public class ChatKafkaStreamsConfig {
                 JsonSerde<ChatMessageCreatedEvent> chatMessageCreatedEventSerde = new JsonSerde<>(
                                 ChatMessageCreatedEvent.class);
 
-                KStream<String, DebeziumEnvelope> stream = streamsBuilder.stream(ChatKafkaTopics.CDC_SCYLLA_CHAT_MESSAGE,
+                KStream<String, DebeziumEnvelope> stream = streamsBuilder.stream(ChatKafkaTopicConfig.CDC_SCYLLA_CHAT_MESSAGE,
                                 Consumed.with(Serdes.String(), debeziumSerde))
                                 .filter((key, envelope) -> envelope != null && envelope.payload() != null
                                                 && envelope.payload().after() != null
@@ -35,7 +35,7 @@ public class ChatKafkaStreamsConfig {
 
                 stream.selectKey((key, envelope) -> envelope.getValFromAfter("trial_id").asText())
                                 .mapValues(ChatMessageCreatedEvent::from)
-                                .to(ChatKafkaTopics.CHAT_MESSAGE_CREATED_EVENT,
+                                .to(ChatKafkaTopicConfig.CHAT_MESSAGE_CREATED_EVENT,
                                                 Produced.with(Serdes.String(), chatMessageCreatedEventSerde));
 
                 return stream;

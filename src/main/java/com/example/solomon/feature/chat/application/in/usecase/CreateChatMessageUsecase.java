@@ -22,11 +22,9 @@ public class CreateChatMessageUsecase {
     private final ChatMessageSeqRepository chatMessageSeqRepository;
 
     public void execute(CreateChatMessageCommand command) {
-        execute(List.of(command));
+        chatMessageRepository.save(toChatMessage(command));
     }
-
-    // All commands must share the same trialId - saveAllInBatch only guarantees atomicity within
-    // a single Scylla partition (see ChatMessageRepository).
+    
     public void execute(List<CreateChatMessageCommand> commands) {
         List<ChatMessage> chatMessages = commands.stream()
                 .map(this::toChatMessage)

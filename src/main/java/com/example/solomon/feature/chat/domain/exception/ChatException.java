@@ -1,14 +1,13 @@
-package com.example.solomon.feature.member.domain.exception;
+package com.example.solomon.feature.chat.domain.exception;
 
 import com.example.solomon.common.domain.exception.ExceptionInfo;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum MemberException implements ExceptionInfo {
+public enum ChatException implements ExceptionInfo {
 
-    UNEXISTS_MEMBER("Unexists member."),
-    DUPLICATE_EMAIL("Email already exists.");
+    NO_AVAILABLE_SERVER("No chat server is currently available.");
 
     private final String message;
 

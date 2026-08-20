@@ -171,6 +171,10 @@ public class TestContainersConfig {
             .withListener(KAFKA_INTERNAL_BOOTSTRAP_SERVERS)
             .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5)));
 
+    private static void initKafkaProperties() {
+        System.setProperty("spring.kafka.bootstrap-servers", KAFKA.getBootstrapServers());
+    }
+
     // ========================
     // Redis
     // ========================
@@ -242,6 +246,7 @@ public class TestContainersConfig {
         initScyllaKeyspace();
         initScyllaProperties();
         initRedisProperties();
+        initKafkaProperties();
 
         // Migrations must finish before Debezium registers connectors against the migrated tables.
         LIQUIBASE_MYSQL.start();

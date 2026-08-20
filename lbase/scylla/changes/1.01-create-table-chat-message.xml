@@ -11,6 +11,7 @@
                 trial_id UUID,
                 id UUID,
                 member_id BIGINT,
+                sequence BIGINT,
                 content TEXT,
                 type TEXT,
                 PRIMARY KEY (trial_id, id)

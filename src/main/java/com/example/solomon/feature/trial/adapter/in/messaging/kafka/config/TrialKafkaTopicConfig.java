@@ -10,9 +10,13 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class TrialKafkaTopicConfig {
 
+    public static final String TRIAL_CREATED_EVENT = "trial-created-event";
+
+    public static final String TRIAL_JOINED_EVENT = "trial-joined-event";
+
     @Bean
     public NewTopic trialCreatedEventTopic() {
-        return TopicBuilder.name(TrialKafkaTopics.TRIAL_CREATED_EVENT)
+        return TopicBuilder.name(TRIAL_CREATED_EVENT)
                 .partitions(2)
                 .replicas(1)
                 .build();
@@ -20,7 +24,7 @@ public class TrialKafkaTopicConfig {
 
     @Bean
     public NewTopic trialJoinedEventTopic() {
-        return TopicBuilder.name(TrialKafkaTopics.TRIAL_JOINED_EVENT)
+        return TopicBuilder.name(TRIAL_JOINED_EVENT)
                 .partitions(2)
                 .replicas(1)
                 .build();

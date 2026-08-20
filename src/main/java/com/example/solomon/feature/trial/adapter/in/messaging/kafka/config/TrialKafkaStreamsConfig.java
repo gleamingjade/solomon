@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
 import com.example.solomon.common.adapter.in.messaging.kafka.DebeziumEnvelope;
-import com.example.solomon.common.adapter.in.messaging.kafka.config.KafkaTopics;
+import com.example.solomon.common.adapter.in.messaging.kafka.config.KafkaTopicConfig;
 import com.example.solomon.feature.trial.domain.event.TrialCreatedEvent;
 import com.example.solomon.feature.trial.domain.event.TrialJoinedEvent;
 
@@ -23,12 +23,13 @@ import com.example.solomon.feature.trial.domain.event.TrialJoinedEvent;
 @Configuration
 public class TrialKafkaStreamsConfig {
 
+
         @Bean
         public KStream<String, DebeziumEnvelope> trialCdcStream(
                         @Qualifier("cdcStreamsBuilder") StreamsBuilder streamsBuilder) {
                 JsonSerde<DebeziumEnvelope> debeziumSerde = new JsonSerde<>(DebeziumEnvelope.class);
 
-                KStream<String, DebeziumEnvelope> stream = streamsBuilder.stream(KafkaTopics.CDC_MYSQL_OUTBOX,
+                KStream<String, DebeziumEnvelope> stream = streamsBuilder.stream(KafkaTopicConfig.CDC_MYSQL_OUTBOX,
                                 Consumed.with(Serdes.String(), debeziumSerde))
                                 .filter((key, envelope) -> envelope != null && envelope.payload() != null
                                                 && envelope.payload().after() != null);
@@ -42,7 +43,7 @@ public class TrialKafkaStreamsConfig {
                                                                                 .getValFromAfter("aggregate_id").asText())
                                                                 .mapValues(envelope -> envelope
                                                                                 .getValFromAfter("payload").asText())
-                                                                .to(TrialKafkaTopics.TRIAL_CREATED_EVENT,
+                                                                .to(TrialKafkaTopicConfig.TRIAL_CREATED_EVENT,
                                                                                 Produced.with(Serdes.String(), Serdes.String()))))
                                 .branch(
                                                 (key, envelope) -> TrialJoinedEvent.EVENT_TYPE
@@ -52,7 +53,7 @@ public class TrialKafkaStreamsConfig {
                                                                                 .getValFromAfter("aggregate_id").asText())
                                                                 .mapValues(envelope -> envelope
                                                                                 .getValFromAfter("payload").asText())
-                                                                .to(TrialKafkaTopics.TRIAL_JOINED_EVENT,
+                                                                .to(TrialKafkaTopicConfig.TRIAL_JOINED_EVENT,
                                                                                 Produced.with(Serdes.String(), Serdes.String()))));
                 return stream;
         }

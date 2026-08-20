@@ -1,5 +1,7 @@
 package com.example.solomon.common.adapter.in.web.security.config;
 
+import com.example.solomon.common.adapter.in.web.security.handler.FormLoginFailureHandler;
+import com.example.solomon.common.adapter.in.web.security.handler.FormLoginSuccessHandler;
 import com.example.solomon.common.adapter.in.web.security.handler.OAuth2AccessDeniedHandler;
 import com.example.solomon.common.adapter.in.web.security.handler.OAuth2AuthenticationEntryPoint;
 import com.example.solomon.common.adapter.in.web.security.handler.OAuth2LoginFailureHandler;
@@ -8,8 +10,12 @@ import com.example.solomon.common.adapter.in.web.security.oauth.SessionRedisOidc
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -27,13 +33,30 @@ public class SecurityConfig {
 
     private final OAuth2AccessDeniedHandler accessDeniedHandler;
 
+    private final FormLoginSuccessHandler formLoginSuccessHandler;
+
+    private final FormLoginFailureHandler formLoginFailureHandler;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     @Bean
     public SecurityFilterChain claudeSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(sessionRedisOidcUserService))
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler))
+                .formLogin(form -> form
+                        .loginProcessingUrl("/api/members/login")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .successHandler(formLoginSuccessHandler)
+                        .failureHandler(formLoginFailureHandler))
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler));
