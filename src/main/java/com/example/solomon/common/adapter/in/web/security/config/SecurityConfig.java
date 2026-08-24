@@ -1,11 +1,11 @@
 package com.example.solomon.common.adapter.in.web.security.config;
 
-import com.example.solomon.common.adapter.in.web.security.handler.FormLoginFailureHandler;
-import com.example.solomon.common.adapter.in.web.security.handler.FormLoginSuccessHandler;
-import com.example.solomon.common.adapter.in.web.security.handler.OAuth2AccessDeniedHandler;
-import com.example.solomon.common.adapter.in.web.security.handler.OAuth2AuthenticationEntryPoint;
-import com.example.solomon.common.adapter.in.web.security.handler.OAuth2LoginFailureHandler;
-import com.example.solomon.common.adapter.in.web.security.handler.OAuth2LoginSuccessHandler;
+import com.example.solomon.common.adapter.in.web.security.form.FormLoginFailureHandler;
+import com.example.solomon.common.adapter.in.web.security.form.FormLoginSuccessHandler;
+import com.example.solomon.common.adapter.in.web.security.SessionAccessDeniedHandler;
+import com.example.solomon.common.adapter.in.web.security.SessionAuthenticationEntryPoint;
+import com.example.solomon.common.adapter.in.web.security.oauth.OAuth2LoginFailureHandler;
+import com.example.solomon.common.adapter.in.web.security.oauth.OAuth2LoginSuccessHandler;
 import com.example.solomon.common.adapter.in.web.security.oauth.SessionRedisOidcUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,9 +29,9 @@ public class SecurityConfig {
 
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
-    private final OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+    private final SessionAuthenticationEntryPoint authenticationEntryPoint;
 
-    private final OAuth2AccessDeniedHandler accessDeniedHandler;
+    private final SessionAccessDeniedHandler accessDeniedHandler;
 
     private final FormLoginSuccessHandler formLoginSuccessHandler;
 
@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler))
                 .formLogin(form -> form
-                        .loginProcessingUrl("/api/members/login")
+                        .loginProcessingUrl("/api/member/login")
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .successHandler(formLoginSuccessHandler)

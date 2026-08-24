@@ -1,4 +1,4 @@
-package com.example.solomon.common.adapter.in.web.security.handler;
+package com.example.solomon.common.adapter.in.web.security;
 
 import java.io.IOException;
 
@@ -13,12 +13,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class OAuth2AuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class SessionAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException, ServletException {
-        log.error("인증되지 않은 접근 - 요청 URI: {}, 발생 클래스: {}, 메시지: {}",
+        log.error("Unauthenticated access - request URI: {}, origin class: {}, message: {}",
                 request.getRequestURI(), ExceptionOrigin.classNameOf(authException), authException.getMessage(),
                 authException);
     }

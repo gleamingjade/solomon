@@ -34,3 +34,6 @@ public class SignUpUseCase {
     }
 
 }
+
+/// 모놀리스라지만  ExceptionInfoHttpStatusResolver에 DUPLICATE_EMAIL → 400 BAD_REQUEST로 매핑도 돼 있음
+// 이거 허용할건지.. 그리고 사인인 제대로 안 되는 거 .. 고치고 전체 검토하고 문서까지..

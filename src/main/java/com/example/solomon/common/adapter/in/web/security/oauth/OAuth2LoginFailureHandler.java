@@ -1,7 +1,9 @@
-package com.example.solomon.common.adapter.in.web.security.handler;
+package com.example.solomon.common.adapter.in.web.security.oauth;
 
 import java.io.IOException;
 
+import com.example.solomon.common.adapter.in.web.security.ExceptionOrigin;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -15,11 +17,19 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
 
+    private final String frontEndOrigin;
+
+    public OAuth2LoginFailureHandler(@Value("${FRONT_END_ORIGIN}") String frontEndOrigin) {
+        this.frontEndOrigin = frontEndOrigin;
+    }
+
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) throws IOException, ServletException {
-        log.error("OAuth2 로그인 실패 - 발생 클래스: {}, 메시지: {}",
+        log.error("OAuth2 login failed - origin class: {}, message: {}",
                 ExceptionOrigin.classNameOf(exception), exception.getMessage(), exception);
+
+        response.sendRedirect(frontEndOrigin + "/login?error=oauth2");
     }
 
 }

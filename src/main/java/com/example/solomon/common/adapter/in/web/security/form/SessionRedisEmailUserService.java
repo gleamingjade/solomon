@@ -2,7 +2,6 @@ package com.example.solomon.common.adapter.in.web.security.form;
 
 import java.util.List;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,9 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class MemberUserDetailsService implements UserDetailsService {
-
-    private static final String ROLE_PREFIX = "ROLE_";
+public class SessionRedisEmailUserService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
 
@@ -34,7 +31,7 @@ public class MemberUserDetailsService implements UserDetailsService {
         return new User(
                 String.valueOf(member.getId()),
                 member.getPassword(),
-                List.of(new SimpleGrantedAuthority(ROLE_PREFIX + member.getRole().name())));
+                List.of(member.getRole().toGrantedAuthority()));
     }
 
 }

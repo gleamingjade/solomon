@@ -15,8 +15,10 @@ import org.springframework.security.jackson2.CoreJackson2Module;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.session.data.redis.config.annotation.SpringSessionRedisConnectionFactory;
 
-import com.example.solomon.common.adapter.in.web.security.oauth.SessionMember;
-import com.example.solomon.common.adapter.in.web.security.oauth.SessionMemberMixin;
+import com.example.solomon.common.adapter.in.web.security.form.SessionRedisEmailUser;
+import com.example.solomon.common.adapter.in.web.security.form.SessionRedisEmailUserMixin;
+import com.example.solomon.common.adapter.in.web.security.SessionMember;
+import com.example.solomon.common.adapter.in.web.security.SessionMemberMixin;
 import com.example.solomon.common.adapter.in.web.security.oauth.SessionRedisOidcUser;
 import com.example.solomon.common.adapter.in.web.security.oauth.SessionRedisOidcUserMixin;
 
@@ -37,8 +39,8 @@ public class SessionRedisConfig {
         return new LettuceConnectionFactory(config);
     }
 
-    // Since we have two RedisConnectionFactory beans, spring-session-data-redis
-    // does not automatically create a RedisTemplate named "redisTemplate".
+    // Since we have two RedisConnectionFactory beans,(they automatically create template only when there is a one factory)
+    // spring-session-data-redis does not automatically create a RedisTemplate named "redisTemplate".
     // Therefore, we need to define it manually.
     @Bean(name = "redisTemplate")
     public RedisTemplate<Object, Object> redisTemplate(
@@ -57,6 +59,7 @@ public class SessionRedisConfig {
         mapper.registerModule(new CoreJackson2Module());
 
         mapper.addMixIn(SessionRedisOidcUser.class, SessionRedisOidcUserMixin.class);
+        mapper.addMixIn(SessionRedisEmailUser.class, SessionRedisEmailUserMixin.class);
         mapper.addMixIn(SessionMember.class, SessionMemberMixin.class);
 
         return new GenericJackson2JsonRedisSerializer(mapper);

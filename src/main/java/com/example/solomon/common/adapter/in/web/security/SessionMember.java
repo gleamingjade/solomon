@@ -1,4 +1,4 @@
-package com.example.solomon.common.adapter.in.web.security.oauth;
+package com.example.solomon.common.adapter.in.web.security;
 
 import java.util.Collection;
 
@@ -18,6 +18,9 @@ public class SessionMember {
 
     private final String httpSessionId;
 
+    // I want this object to remain immutable.
+    // But you know that Jackson need to default constructor.
+    // So this can be alternative for defining default constructor. @JsonCreator.
     @JsonCreator
     public SessionMember(
             @JsonProperty("id") String id,

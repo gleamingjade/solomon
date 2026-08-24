@@ -14,8 +14,8 @@ public class SolomonApplication {
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 		SpringApplication.run(SolomonApplication.class, args);
 
-		// docker compose -f ~/Projects/solomon/docker/docker-compose-local.yml down -v --rmi all
-		// docker compose -f ~/Projects/solomon/docker/docker-compose-local.yml up -d
+		// docker compose -f ~/Projects/solomon/backend/docker/docker-compose-local.yml down -v --rmi all
+		// docker compose -f ~/Projects/solomon/backend/docker/docker-compose-local.yml up -d
 		// ./gradlew bootRun --args='--spring.profiles.active=local'
 	}
 

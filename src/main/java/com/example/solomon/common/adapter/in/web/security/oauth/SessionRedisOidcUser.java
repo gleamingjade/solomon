@@ -1,5 +1,6 @@
 package com.example.solomon.common.adapter.in.web.security.oauth;
 
+import com.example.solomon.common.adapter.in.web.security.SessionMember;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,22 +27,22 @@ public class SessionRedisOidcUser implements OidcUser {
 
     @Override
     public Map<String, Object> getClaims() {
-        throw new UnsupportedOperationException("claims are not retained in the session");
+        throw new UnsupportedOperationException("Claims are not retained in the session.");
     }
 
     @Override
     public OidcUserInfo getUserInfo() {
-        throw new UnsupportedOperationException("user info is not retained in the session");
+        throw new UnsupportedOperationException("User info is not retained in the session.");
     }
 
     @Override
     public OidcIdToken getIdToken() {
-        throw new UnsupportedOperationException("ID token is not retained in the session");
+        throw new UnsupportedOperationException("ID token is not retained in the session.");
     }
 
     @Override
     public Map<String, Object> getAttributes() {
-        throw new UnsupportedOperationException("attributes are not retained in the session");
+        throw new UnsupportedOperationException("Attributes are not retained in the session.");
     }
 
     @Override

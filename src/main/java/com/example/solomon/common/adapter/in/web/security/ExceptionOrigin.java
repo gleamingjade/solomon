@@ -1,6 +1,6 @@
-package com.example.solomon.common.adapter.in.web.security.handler;
+package com.example.solomon.common.adapter.in.web.security;
 
-final class ExceptionOrigin {
+public final class ExceptionOrigin {
 
     private ExceptionOrigin() {
     }

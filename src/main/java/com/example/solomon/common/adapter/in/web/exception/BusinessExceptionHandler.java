@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.example.solomon.common.adapter.in.web.dto.ErrorResponse;
 import com.example.solomon.common.domain.exception.BusinessException;
 
 import lombok.RequiredArgsConstructor;
@@ -16,10 +17,11 @@ public class BusinessExceptionHandler {
     private final ExceptionInfoHttpStatusResolver exceptionInfoHttpStatusResolver;
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<String> handleBusinessException(BusinessException exception) {
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
         HttpStatus httpStatus = exceptionInfoHttpStatusResolver.resolve(exception.getExceptionInfo());
 
-        return ResponseEntity.status(httpStatus).body(exception.getExceptionInfo().getMessage());
+        return ResponseEntity.status(httpStatus)
+                .body(ErrorResponse.of(httpStatus, exception.getExceptionInfo().getMessage()));
     }
 
 }

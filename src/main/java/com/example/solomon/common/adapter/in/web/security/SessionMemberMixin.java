@@ -1,4 +1,4 @@
-package com.example.solomon.common.adapter.in.web.security.oauth;
+package com.example.solomon.common.adapter.in.web.security;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 

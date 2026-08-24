@@ -1,9 +1,9 @@
 package com.example.solomon.common.adapter.in.web.security.oauth;
 
+import com.example.solomon.common.adapter.in.web.security.SessionMember;
 import com.example.solomon.feature.member.application.out.MemberRepository;
 import com.example.solomon.feature.member.domain.entity.Member;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -22,8 +22,6 @@ public class SessionRedisOidcUserService extends OidcUserService {
 
     private final MemberRepository memberRepository;
 
-    public static final String ROLE_PREFIX = "ROLE_";
-
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         DefaultOidcUser oidcUser = (DefaultOidcUser) super.loadUser(userRequest);
@@ -33,8 +31,7 @@ public class SessionRedisOidcUserService extends OidcUserService {
 
         SessionMember sessionMember = new SessionMember(
                 String.valueOf(member.getId()),
-                new ArrayList<>(List.of(
-                        new SimpleGrantedAuthority(ROLE_PREFIX + member.getRole().name()))),
+                new ArrayList<>(List.of(member.getRole().toGrantedAuthority())),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest().getSession(true).getId());
 
         return new SessionRedisOidcUser(sessionMember);

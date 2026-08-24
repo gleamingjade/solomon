@@ -1,4 +1,4 @@
-package com.example.solomon.common.adapter.in.web.security.handler;
+package com.example.solomon.common.adapter.in.web.security.oauth;
 
 import java.io.IOException;
 
@@ -8,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -25,8 +24,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        log.debug("Login Success!!");
-//        response.sendRedirect(frontEndOrigin);
+        response.sendRedirect(frontEndOrigin + "/");
     }
 
 }
