@@ -1,5 +1,6 @@
 package com.example.solomon.common.adapter.in.web.security;
 
+import java.security.Principal;
 import java.util.Collection;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -9,8 +10,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 
+import javax.security.auth.Subject;
+
 @Getter
-public class SessionMember {
+public class SessionMember implements Principal {
 
     private final String id;
 
@@ -31,4 +34,13 @@ public class SessionMember {
         this.httpSessionId = httpSessionId;
     }
 
+    @Override
+    public String getName() {
+        return id;
+    }
+
+    @Override
+    public boolean implies(Subject subject) {
+        return Principal.super.implies(subject);
+    }
 }

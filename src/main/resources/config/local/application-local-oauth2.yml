@@ -4,6 +4,7 @@ spring:
     redis:
       namespace: solomon:session
       timeout: 1h
+      repository-type: indexed
 
   security:
     oauth2:

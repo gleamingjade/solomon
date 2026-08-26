@@ -11,9 +11,12 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.jackson2.CoreJackson2Module;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
+import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.data.redis.config.annotation.SpringSessionRedisConnectionFactory;
+import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 import com.example.solomon.common.adapter.in.web.security.form.SessionRedisEmailUser;
 import com.example.solomon.common.adapter.in.web.security.form.SessionRedisEmailUserMixin;
@@ -63,6 +66,11 @@ public class SessionRedisConfig {
         mapper.addMixIn(SessionMember.class, SessionMemberMixin.class);
 
         return new GenericJackson2JsonRedisSerializer(mapper);
+    }
+
+    @Bean
+    public SessionRegistry sessionRegistry(FindByIndexNameSessionRepository<?> sessionRepository) {
+        return new SpringSessionBackedSessionRegistry<>(sessionRepository);
     }
 
 }

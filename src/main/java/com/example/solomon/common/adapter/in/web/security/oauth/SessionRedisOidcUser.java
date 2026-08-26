@@ -1,6 +1,7 @@
 package com.example.solomon.common.adapter.in.web.security.oauth;
 
 import com.example.solomon.common.adapter.in.web.security.SessionMember;
+import com.example.solomon.common.adapter.in.web.security.SessionMemberHolder;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,7 +16,7 @@ import java.util.Map;
 @JsonAutoDetect(
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-public class SessionRedisOidcUser implements OidcUser {
+public class SessionRedisOidcUser implements OidcUser, SessionMemberHolder {
 
     @JsonProperty("sessionMember")
     private final SessionMember sessionMember;
@@ -53,6 +54,11 @@ public class SessionRedisOidcUser implements OidcUser {
     @Override
     public String getName() {
         return sessionMember.getId();
+    }
+
+    @Override
+    public SessionMember getSessionMember() {
+        return sessionMember;
     }
 
 }

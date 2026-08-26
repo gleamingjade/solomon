@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.solomon.common.adapter.in.web.security.SessionMember;
+import com.example.solomon.common.adapter.in.web.security.SessionMemberHolder;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-public class SessionRedisEmailUser implements UserDetails {
+public class SessionRedisEmailUser implements UserDetails, SessionMemberHolder {
 
     @JsonProperty("sessionMember")
     private final SessionMember sessionMember;
@@ -36,6 +37,11 @@ public class SessionRedisEmailUser implements UserDetails {
     @Override
     public String getUsername() {
         return sessionMember.getId();
+    }
+
+    @Override
+    public SessionMember getSessionMember() {
+        return sessionMember;
     }
 
 }
