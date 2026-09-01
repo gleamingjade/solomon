@@ -18,6 +18,7 @@ import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.data.redis.config.annotation.SpringSessionRedisConnectionFactory;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
+import com.example.solomon.common.adapter.out.persistence.cache.redis.config.RedisProperties;
 import com.example.solomon.common.adapter.in.web.security.form.SessionRedisEmailUser;
 import com.example.solomon.common.adapter.in.web.security.form.SessionRedisEmailUserMixin;
 import com.example.solomon.common.adapter.in.web.security.SessionMember;
@@ -30,10 +31,11 @@ import java.util.List;
 @Configuration
 public class SessionRedisConfig {
 
-    @Bean(name = "sessionRedisConnectionFactory")
+    // Single shared connection factory for the whole app (session storage + trial cache both
+    // point at this). @SpringSessionRedisConnectionFactory tells Spring Session to use it too.
+    @Bean(name = "redisConnectionFactory")
     @SpringSessionRedisConnectionFactory
-    public RedisConnectionFactory sessionRedisConnectionFactory(
-            SessionRedisProperties props) {
+    public RedisConnectionFactory redisConnectionFactory(RedisProperties props) {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
 
         config.setHostName(props.host());
@@ -42,12 +44,9 @@ public class SessionRedisConfig {
         return new LettuceConnectionFactory(config);
     }
 
-    // Since we have two RedisConnectionFactory beans,(they automatically create template only when there is a one factory)
-    // spring-session-data-redis does not automatically create a RedisTemplate named "redisTemplate".
-    // Therefore, we need to define it manually.
     @Bean(name = "redisTemplate")
     public RedisTemplate<Object, Object> redisTemplate(
-            @Qualifier("sessionRedisConnectionFactory") RedisConnectionFactory connectionFactory) {
+            @Qualifier("redisConnectionFactory") RedisConnectionFactory connectionFactory) {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         return template;

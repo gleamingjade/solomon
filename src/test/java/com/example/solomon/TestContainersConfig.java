@@ -179,28 +179,19 @@ public class TestContainersConfig {
     // Redis
     // ========================
     private static final int REDIS_PORT = 6379;
-    private static final String SESSION_REDIS_ALIAS = "session-redis";
-    private static final String TRIAL_CACHE_REDIS_ALIAS = "trial-cache-redis";
+    private static final String REDIS_ALIAS = "redis";
 
-    public static final GenericContainer<?> SESSION_REDIS = new GenericContainer<>(DockerImageName.parse("redis:8"))
+    public static final GenericContainer<?> REDIS = new GenericContainer<>(DockerImageName.parse("redis:8"))
             .withNetwork(NETWORK)
-            .withNetworkAliases(SESSION_REDIS_ALIAS)
+            .withNetworkAliases(REDIS_ALIAS)
             .withExposedPorts(REDIS_PORT)
             .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5)));
 
-    public static final GenericContainer<?> TRIAL_CACHE_REDIS = new GenericContainer<>(DockerImageName.parse("redis:8"))
-            .withNetwork(NETWORK)
-            .withNetworkAliases(TRIAL_CACHE_REDIS_ALIAS)
-            .withExposedPorts(REDIS_PORT)
-            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5)));
-
-    // Custom redis.session.* / redis.trial.* properties, not the standard spring.data.redis.* ones,
-    // so @ServiceConnection doesn't apply here either.
+    // Custom redis.* properties, not the standard spring.data.redis.* ones, so @ServiceConnection
+    // doesn't apply here either.
     private static void initRedisProperties() {
-        System.setProperty("redis.session.host", SESSION_REDIS.getHost());
-        System.setProperty("redis.session.port", SESSION_REDIS.getMappedPort(REDIS_PORT).toString());
-        System.setProperty("redis.trial.host", TRIAL_CACHE_REDIS.getHost());
-        System.setProperty("redis.trial.port", TRIAL_CACHE_REDIS.getMappedPort(REDIS_PORT).toString());
+        System.setProperty("redis.host", REDIS.getHost());
+        System.setProperty("redis.port", REDIS.getMappedPort(REDIS_PORT).toString());
     }
 
     // ========================
@@ -239,7 +230,7 @@ public class TestContainersConfig {
 
     static {
         // Parallel start.
-        Startables.deepStart(MYSQL, SCYLLA, KAFKA, SESSION_REDIS, TRIAL_CACHE_REDIS).join();
+        Startables.deepStart(MYSQL, SCYLLA, KAFKA, REDIS).join();
 
         // I said that it is impossible for Scylla to register Scylla source connector in advance without schema.
         // And the library 'spring-boot-testcontainers' i'm using does not support @ServiceConnection for Scylla.

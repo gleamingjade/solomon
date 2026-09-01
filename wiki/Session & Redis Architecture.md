@@ -123,7 +123,7 @@ Later, authenticated request
 
 ## Project-Specific Notes
 
-- Two independent Redis connections exist: `redis.session` (session store, port 6379) and `redis.trial` (chat/trial cache, port 6380). `SessionRedisConfig` manually defines a `redisTemplate` bean because with two `RedisConnectionFactory` beans present, Spring Boot won't auto-create one.
+- Session storage and the trial/chat cache share a single Redis instance (`redis.host`/`redis.port`, one `RedisConnectionFactory` bean in `SessionRedisConfig`, reused by `TrialCacheRedisConfig`) — they used to be two separate Redis connections, merged since neither key namespace collides (`solomon:session:*` vs `servers`/`server:*`/`trial:*`).
 - `spring.session.redis.namespace: solomon:session`, `timeout: 1h` (`application-local-oauth2.yml`).
 - Session cookie name is explicitly set to `SOLOMON_SESSION` via `server.servlet.session.cookie.name` (`application-local-oauth2.yml`) 
 - `Authentication.getName()` resolves to the member id string for **both** login methods (`AbstractAuthenticationToken.getName()` checks `UserDetails.getUsername()` first, then falls back to `AuthenticatedPrincipal.getName()` — `OidcUser`/`OAuth2User` implement the latter). This is why a controller can just take `Authentication authentication` and call `.getName()` without caring which login method was used.

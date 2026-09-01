@@ -1,0 +1,14 @@
+{
+  "name": "lambda-chat-routing",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/lambda-entry.js",
+  "scripts": {
+    "start:local": "node src/local-server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ioredis": "^5.4.1"
+  }
+}

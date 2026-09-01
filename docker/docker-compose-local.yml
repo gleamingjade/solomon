@@ -235,27 +235,12 @@ services:
   # ========================
   # Redis
   # ========================
-  session-redis:
+  redis:
     image: redis:8
     ports:
       - "6379:6379"
     volumes:
-      - session-redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 30
-
-  # ========================
-  # Redis
-  # ========================
-  trial-cache-redis:
-    image: redis:8
-    ports:
-      - "6380:6379"
-    volumes:
-      - trial-cache-redis-data:/data
+      - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -270,30 +255,28 @@ services:
     ports:
       - "5540:5540"
     depends_on:
-      - session-redis
-      - trial-cache-redis
+      - redis
 
   # ========================
-  # Webdis
+  # Chat Routing Lambda
   # ========================
-  webdis:
-    image: nicolas/webdis:latest
+  chat-routing-lambda:
+    build:
+      context: ../lambda-chat-routing
+    command: ["node", "src/local-server.js"]
     ports:
-      - "7379:7379"
+      - "9000:8080"
     environment:
-      - REDIS_HOST=trial-cache-redis
-      - REDIS_PORT=6379
-    volumes:
-      - ./webdis.json:/etc/webdis.new.json
-    command: ["/usr/local/bin/webdis", "/etc/webdis.new.json"]
+      REDIS_MODE: tcp
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     depends_on:
-      trial-cache-redis:
+      redis:
         condition: service_healthy
 
 volumes:
   mysql-data:
   scylla_data:
   kafka-data:
-  session-redis-data:
-  trial-cache-redis-data:
+  redis-data:
 
