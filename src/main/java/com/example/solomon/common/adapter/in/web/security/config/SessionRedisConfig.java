@@ -2,20 +2,17 @@ package com.example.solomon.common.adapter.in.web.security.config;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.jackson2.CoreJackson2Module;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.session.FindByIndexNameSessionRepository;
-import org.springframework.session.data.redis.config.annotation.SpringSessionRedisConnectionFactory;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 import com.example.solomon.common.adapter.out.persistence.cache.redis.config.RedisProperties;
@@ -32,9 +29,9 @@ import java.util.List;
 public class SessionRedisConfig {
 
     // Single shared connection factory for the whole app (session storage + trial cache both
-    // point at this). @SpringSessionRedisConnectionFactory tells Spring Session to use it too.
+    // point at this). It's the only RedisConnectionFactory bean, so Spring Session picks it up
+    // automatically without needing @SpringSessionRedisConnectionFactory.
     @Bean(name = "redisConnectionFactory")
-    @SpringSessionRedisConnectionFactory
     public RedisConnectionFactory redisConnectionFactory(RedisProperties props) {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
 
@@ -42,14 +39,6 @@ public class SessionRedisConfig {
         config.setPort(props.port());
 
         return new LettuceConnectionFactory(config);
-    }
-
-    @Bean(name = "redisTemplate")
-    public RedisTemplate<Object, Object> redisTemplate(
-            @Qualifier("redisConnectionFactory") RedisConnectionFactory connectionFactory) {
-        RedisTemplate<Object, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
-        return template;
     }
 
     @Bean
