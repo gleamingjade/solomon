@@ -2,24 +2,17 @@ package com.example.solomon.feature.chat.domain.event;
 
 import java.util.UUID;
 
-import com.example.solomon.common.adapter.in.messaging.kafka.DebeziumEnvelope;
 import com.example.solomon.feature.chat.domain.entity.MessageType;
-import com.fasterxml.jackson.databind.JsonNode;
 
+// serverId is the id of the server that produced this event (always the trial's owning server,
+// per same-server locality) - consumers compare it against their own SERVER_ID to decide whether
+// they're the owner (apply to RocksDB + fanout + derived work) or a replica (apply only). See
+// the "Chat Persistence" wiki doc.
 public record ChatMessageCreatedEvent(
         UUID trialId,
         String content,
         Long sequence,
-        MessageType type) {
-
-    public static ChatMessageCreatedEvent from(DebeziumEnvelope envelope) {
-        JsonNode after = envelope.payload().after();
-
-        return new ChatMessageCreatedEvent(
-                UUID.fromString(after.get("trial_id").asText()),
-                after.get("content").asText(),
-                after.get("sequence").asLong(),
-                MessageType.valueOf(after.get("type").asText()));
-    }
+        MessageType type,
+        String serverId) {
 
 }

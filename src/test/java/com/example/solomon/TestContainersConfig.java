@@ -1,6 +1,5 @@
 package com.example.solomon;
 
-import com.datastax.oss.driver.api.core.CqlSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.awaitility.Awaitility;
@@ -12,16 +11,13 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.mysql.MySQLContainer;
-import org.testcontainers.scylladb.ScyllaDBContainer;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -77,45 +73,6 @@ public class TestContainersConfig {
             .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5)));
 
     // ========================
-    // Scylla
-    // ========================
-    private static final String SCYLLA_NETWORK_ALIAS = "scylla";
-    public static final int SCYLLA_PORT = 9042;
-    public static final String SCYLLA_KEYSPACE = "localscylla";
-    private static final String SCYLLA_CHAT_MESSAGE_TABLE = "chat_message";
-    private static final String SCYLLA_CDC_TOPIC_PREFIX = "cdc-scylla";
-
-    public static final ScyllaDBContainer SCYLLA = new ScyllaDBContainer("scylladb/scylla:2026.1.7")
-            .withNetwork(NETWORK)
-            .withNetworkAliases(SCYLLA_NETWORK_ALIAS)
-            .withExposedPorts(SCYLLA_PORT)
-            .withCommand("--smp", "1", "--memory", "2G")
-            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5)));
-
-    // The keyspace must exist before Liquibase can migrate into it, so it's created up front here
-    // (mirrors the "scylla-keyspace-init" step in docker-compose-local.yml).
-    private static void initScyllaKeyspace() {
-        CqlSession session = CqlSession.builder()
-                .addContactPoint(new InetSocketAddress(SCYLLA.getHost(), SCYLLA.getMappedPort(SCYLLA_PORT)))
-                .withLocalDatacenter("datacenter1")
-                .build();
-
-        session.execute("CREATE KEYSPACE IF NOT EXISTS " + SCYLLA_KEYSPACE + " WITH replication = "
-                + "{'class': 'NetworkTopologyStrategy', 'datacenter1': 1}");
-
-        session.close();
-    }
-
-    // We can't use @ServiceConnection with Scylla..
-    private static void initScyllaProperties() {
-        System.setProperty("spring.cassandra.contact-points", SCYLLA.getHost());
-        System.setProperty("spring.cassandra.port", SCYLLA.getMappedPort(SCYLLA_PORT).toString());
-        System.setProperty("spring.cassandra.keyspace-name", SCYLLA_KEYSPACE);
-        System.setProperty("spring.cassandra.local-datacenter", "datacenter1");
-        System.setProperty("spring.cassandra.schema-action", "none");
-    }
-
-    // ========================
     // Liquibase
     // ========================
     private static final Path PROJECT_ROOT = Paths.get(System.getProperty("user.dir"));
@@ -136,25 +93,6 @@ public class TestContainersConfig {
                     "--password=" + MYSQL_PASSWORD,
                     "--driver=com.mysql.cj.jdbc.Driver",
                     "--changeLogFile=db.changelog-master.xml",
-                    "update")
-            .withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofMinutes(5)));
-
-    public static final GenericContainer<?> LIQUIBASE_SCYLLA = new GenericContainer<>(
-            DockerImageName.parse("liquibase/liquibase:5.0.2"))
-            .withNetwork(NETWORK)
-            .dependsOn(SCYLLA)
-            .withCopyFileToContainer(
-                    MountableFile.forHostPath(PROJECT_ROOT.resolve("lbase/scylla")),
-                    "/liquibase/changelog")
-            .withCopyFileToContainer(
-                    MountableFile.forHostPath(PROJECT_ROOT.resolve("build/liquibase-drivers/scylla")),
-                    "/liquibase/lib")
-            .withCommand(
-                    "--url=jdbc:cassandra://" + SCYLLA_NETWORK_ALIAS + ":" + SCYLLA_PORT + "/" + SCYLLA_KEYSPACE
-                            + "?localdatacenter=datacenter1",
-                    "--username=cassandra",
-                    "--password=cassandra",
-                    "--changeLogFile=db.changelog-scylla.xml",
                     "update")
             .withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofMinutes(5)));
 
@@ -199,19 +137,9 @@ public class TestContainersConfig {
     // ========================
     public static final int DEBEZIUM_PORT = 8083;
     private static final String MYSQL_CONNECTOR_NAME = "mysql-source-connector";
-    private static final String SCYLLA_CONNECTOR_NAME = "scylla-source-connector";
 
-    public static final ImageFromDockerfile DEBEZIUM_IMAGE = new ImageFromDockerfile("debezium")
-            .withDockerfileFromBuilder(builder -> builder
-                    .from("quay.io/debezium/connect:3.4.3.Final")
-                    .user("root")
-                    .run("mkdir -p /kafka/connect/scylla")
-                    .run("curl -L https://repo1.maven.org/maven2/com/scylladb/scylla-cdc-source-connector/2.0.3/scylla-cdc-source-connector-2.0.3-jar-with-dependencies.jar -o /kafka/connect/scylla/scylla-cdc-source-connector.jar")
-                    .run("chown -R kafka:kafka /kafka/connect/scylla")
-                    .user("kafka")
-                    .build());
-
-    public static final GenericContainer<?> DEBEZIUM = new GenericContainer<>(DEBEZIUM_IMAGE)
+    public static final GenericContainer<?> DEBEZIUM = new GenericContainer<>(
+            DockerImageName.parse("quay.io/debezium/connect:3.4.3.Final"))
             .withNetwork(NETWORK)
             .withExposedPorts(DEBEZIUM_PORT)
             .dependsOn(KAFKA)
@@ -230,18 +158,13 @@ public class TestContainersConfig {
 
     static {
         // Parallel start.
-        Startables.deepStart(MYSQL, SCYLLA, KAFKA, REDIS).join();
+        Startables.deepStart(MYSQL, KAFKA, REDIS).join();
 
-        // I said that it is impossible for Scylla to register Scylla source connector in advance without schema.
-        // And the library 'spring-boot-testcontainers' i'm using does not support @ServiceConnection for Scylla.
-        initScyllaKeyspace();
-        initScyllaProperties();
         initRedisProperties();
         initKafkaProperties();
 
         // Migrations must finish before Debezium registers connectors against the migrated tables.
         LIQUIBASE_MYSQL.start();
-        LIQUIBASE_SCYLLA.start();
 
         DEBEZIUM.start();
     }
@@ -276,7 +199,6 @@ public class TestContainersConfig {
 
             waitForConnectorPlugin();
             registerMySQLSourceConnector();
-            registerScyllaSourceConnector();
         };
     }
 
@@ -300,8 +222,7 @@ public class TestContainersConfig {
                             HttpResponse.BodyHandlers.ofString());
 
                     return response.statusCode() == 200
-                            && response.body().contains("io.debezium.connector.mysql.MySqlConnector")
-                            && response.body().contains("com.scylladb.cdc.debezium.connector.ScyllaConnector");
+                            && response.body().contains("io.debezium.connector.mysql.MySqlConnector");
                 });
     }
 
@@ -340,54 +261,6 @@ public class TestContainersConfig {
 
                     Map<String, Object> request = Map.of(
                             "name", MYSQL_CONNECTOR_NAME,
-                            "config", config);
-
-                    String json = new ObjectMapper().writeValueAsString(request);
-
-                    HttpResponse<String> response = HttpClient.newHttpClient().send(
-                            HttpRequest.newBuilder()
-                                    .uri(URI.create(url))
-                                    .header("Content-Type", "application/json")
-                                    .POST(HttpRequest.BodyPublishers.ofString(json))
-                                    .build(),
-                            HttpResponse.BodyHandlers.ofString());
-
-                    if (response.statusCode() != 201
-                            && response.statusCode() != 409) {
-                        throw new IllegalStateException(response.body());
-                    }
-                });
-    }
-
-    private void registerScyllaSourceConnector() {
-        Awaitility.await()
-                .atMost(Duration.ofMinutes(1))
-                .pollInterval(Duration.ofSeconds(2))
-                .ignoreExceptions()
-                .untilAsserted(() -> {
-                    String url = "http://"
-                            + DEBEZIUM.getHost()
-                            + ":"
-                            + DEBEZIUM.getMappedPort(DEBEZIUM_PORT)
-                            + "/connectors";
-
-                    Map<String, Object> config = new HashMap<>();
-
-                    config.put("connector.class",
-                            "com.scylladb.cdc.debezium.connector.ScyllaConnector");
-                    config.put("scylla.cluster.ip.addresses", SCYLLA_NETWORK_ALIAS + ":" + SCYLLA_PORT);
-                    config.put("topic.prefix", SCYLLA_CDC_TOPIC_PREFIX);
-                    config.put("scylla.table.names", SCYLLA_KEYSPACE + "." + SCYLLA_CHAT_MESSAGE_TABLE);
-
-                    config.put("key.converter", "org.apache.kafka.connect.json.JsonConverter");
-                    config.put("value.converter", "org.apache.kafka.connect.json.JsonConverter");
-                    config.put("key.converter.schemas.enable", "true");
-                    config.put("value.converter.schemas.enable", "true");
-
-                    config.put("tasks.max", "1");
-
-                    Map<String, Object> request = Map.of(
-                            "name", SCYLLA_CONNECTOR_NAME,
                             "config", config);
 
                     String json = new ObjectMapper().writeValueAsString(request);

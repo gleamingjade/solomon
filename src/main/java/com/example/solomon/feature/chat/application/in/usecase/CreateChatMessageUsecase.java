@@ -1,15 +1,17 @@
-
 package com.example.solomon.feature.chat.application.in.usecase;
 
 import java.util.List;
-import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaOperations;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import com.example.solomon.feature.chat.adapter.in.messaging.kafka.config.ChatKafkaTopicConfig;
 import com.example.solomon.feature.chat.application.in.usecase.dto.CreateChatMessageCommand;
-import com.example.solomon.feature.chat.application.out.ChatMessageRepository;
 import com.example.solomon.feature.chat.application.out.ChatMessageSeqRepository;
-import com.example.solomon.feature.chat.domain.entity.ChatMessage;
+import com.example.solomon.feature.chat.domain.event.ChatMessageCreatedEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,35 +19,51 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreateChatMessageUsecase {
 
-    private final ChatMessageRepository chatMessageRepository;
-
     private final ChatMessageSeqRepository chatMessageSeqRepository;
 
+    private final KafkaTemplate<Object, Object> kafkaTemplate;
+
+    @Qualifier("chatMessageTransactionalKafkaTemplate")
+    private final KafkaTemplate<Object, Object> transactionalKafkaTemplate;
+
+    @Value("${SERVER_ID}")
+    private String serverId;
+
+    // A single message has nothing to be atomic with, so this stays on the plain template -
+    // no transaction round trips to pay for.
     public void execute(CreateChatMessageCommand command) {
-        chatMessageRepository.save(toChatMessage(command));
+        publish(kafkaTemplate, toEvent(command));
     }
-    
+
+    // Wrapped in one Kafka transaction so the batch is all-or-nothing - without this, one
+    // message could land while another silently failed (e.g. the "joined" system message
+    // publishes but the "ready" prompt doesn't), and re-deriving sequence numbers on a naive
+    // retry would duplicate the one that already succeeded. See the "Chat Persistence" wiki doc.
     public void execute(List<CreateChatMessageCommand> commands) {
-        List<ChatMessage> chatMessages = commands.stream()
-                .map(this::toChatMessage)
+        List<ChatMessageCreatedEvent> events = commands.stream()
+                .map(this::toEvent)
                 .toList();
 
-        chatMessageRepository.saveAllInBatch(chatMessages);
+        transactionalKafkaTemplate.executeInTransaction(ops -> {
+            events.forEach(event -> publish(ops, event));
+            return null;
+        });
     }
 
-    private ChatMessage toChatMessage(CreateChatMessageCommand command) {
-        Long seq = chatMessageSeqRepository.incr(command.trialId().toString());
+    private ChatMessageCreatedEvent toEvent(CreateChatMessageCommand command) {
+        Long seq = chatMessageSeqRepository.next(command.trialId());
 
-        if (seq == 0L) {
-            Optional<ChatMessage> cm = chatMessageRepository.findLatestByTrialId(command.trialId());
+        return new ChatMessageCreatedEvent(command.trialId(), command.content(), seq, command.type(), serverId);
+    }
 
-            if (cm.isPresent()) {
-                seq = cm.get().getSequence();
-                chatMessageSeqRepository.fillBack(command.trialId().toString(), String.valueOf(seq));
-            }
-        }
-
-        return ChatMessage.create(command.trialId(), command.memberId(), seq, command.content(), command.type());
+    // Kafka is the durability commit point (see the "Chat Persistence" wiki doc) - RocksDB
+    // apply, WebSocket fanout, and derived work all happen downstream in the consumer, only
+    // once this produce succeeds.
+    private void publish(KafkaOperations<Object, Object> operations, ChatMessageCreatedEvent event) {
+        operations.send(
+                ChatKafkaTopicConfig.CHAT_MESSAGE_CREATED_EVENT,
+                event.trialId().toString(),
+                event);
     }
 
 }

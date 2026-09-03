@@ -1,7 +1,0 @@
-spring:
-    cassandra:
-      contact-points: localhost
-      port: 9042
-      keyspace-name: localscylla
-      local-datacenter: datacenter1
-      schema-action: none

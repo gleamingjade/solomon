@@ -24,21 +24,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final SessionAuthenticationEntryPoint authenticationEntryPoint;
+    private final SessionAccessDeniedHandler accessDeniedHandler;
+    private final SessionRegistry sessionRegistry;
+
     private final SessionRedisOidcUserService sessionRedisOidcUserService;
-
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
-    private final SessionAuthenticationEntryPoint authenticationEntryPoint;
-
-    private final SessionAccessDeniedHandler accessDeniedHandler;
-
     private final FormLoginSuccessHandler formLoginSuccessHandler;
-
     private final FormLoginFailureHandler formLoginFailureHandler;
-
-    private final SessionRegistry sessionRegistry;
 
     @Bean
     public PasswordEncoder passwordEncoder() {

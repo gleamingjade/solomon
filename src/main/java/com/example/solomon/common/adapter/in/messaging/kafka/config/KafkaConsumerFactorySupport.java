@@ -33,7 +33,7 @@ public class KafkaConsumerFactorySupport {
     private final KafkaTemplate<Object, Object> kafkaTemplate;
 
     public KafkaConsumerFactorySupport(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
-                                        KafkaTemplate<Object, Object> kafkaTemplate) {
+                                       KafkaTemplate<Object, Object> kafkaTemplate) {
         this.bootstrapServers = bootstrapServers;
         this.kafkaTemplate = kafkaTemplate;
     }
@@ -43,6 +43,11 @@ public class KafkaConsumerFactorySupport {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        // Transactionally-produced messages land in the log either way, committed or aborted -
+        // only a marker record tells them apart. Without this, a consumer would happily process
+        // messages belonging to an aborted (rolled-back) transaction too. Harmless for topics
+        // nothing ever produces to transactionally.
+        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         return props;
     }
 
@@ -51,8 +56,8 @@ public class KafkaConsumerFactorySupport {
     // the offset is never committed, so Kafka keeps redelivering the same record - we don't drop
     // it, but that does mean the partition stalls until it's resolved (see recoveryFailed below).
     private DefaultErrorHandler buildErrorHandler(String listenerLabel) {
-        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate);
-        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 3L));
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(
+                new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(1000L, 3L));
 
         // A deserialization failure will never succeed on retry (the bytes don't change), so skip
         // straight to the DLT instead of wasting 3 retries on it.
@@ -82,10 +87,13 @@ public class KafkaConsumerFactorySupport {
     // KafkaTopicConfig creates each topic with 2 partitions, matched to our 2 app-server
     // instances, so each container should only run 1 consumer thread here - the 2 instances
     // together then hold exactly 1 partition each instead of over-subscribing.
-    public <T> ConcurrentKafkaListenerContainerFactory<String, T> buildFactory(
-            Class<T> valueType, String groupId, String errorLabel) {
+    //
+    // groupId is always "<topic>-consumer" and the error-log label is always the topic itself -
+    // every caller was building both from the same topic constant, so that's done here once
+    // instead of at every call site.
+    public <T> ConcurrentKafkaListenerContainerFactory<String, T> buildFactory(Class<T> valueType, String topic) {
         Map<String, Object> props = getBaseProps();
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, topic + "-consumer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 
@@ -96,7 +104,7 @@ public class KafkaConsumerFactorySupport {
         ConcurrentKafkaListenerContainerFactory<String, T> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(1);
-        factory.setCommonErrorHandler(buildErrorHandler(errorLabel));
+        factory.setCommonErrorHandler(buildErrorHandler(topic));
 
         return factory;
     }

@@ -51,56 +51,6 @@ services:
       - update
 
   # ========================
-  # Scylla
-  # ========================
-  scylla:
-    image: scylladb/scylla:2026.1.7
-    ports:
-      - "9042:9042"
-    command: --smp 1 --memory 2G
-    healthcheck:
-      test: ["CMD-SHELL", "nodetool status | grep -E '^UN' || exit 1"]
-      interval: 5s 
-      timeout: 3s 
-      retries: 30    
-    volumes:
-          - scylla_data:/var/lib/scylla
-
-  scylla-keyspace-init:
-    image: scylladb/scylla:2026.1.7
-    depends_on:
-      scylla:
-        condition: service_healthy
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        echo "Creating keyspace..."
-        cqlsh scylla 9042 -e "CREATE KEYSPACE IF NOT EXISTS localscylla WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1': 1};"
-        echo "Done."
-
-  # ========================
-  # Liquibase - ScyllaDB Migration
-  # ========================
-  liquibase-scylla:
-    build:
-      context: .
-      dockerfile: liquibase-scylla.Dockerfile
-    depends_on:
-      scylla:
-        condition: service_healthy
-      scylla-keyspace-init:
-        condition: service_completed_successfully
-    volumes:
-      - ../lbase/scylla:/liquibase/changelog
-    command:
-      - --url=jdbc:cassandra://scylla:9042/localscylla?localdatacenter=datacenter1
-      - --username=cassandra
-      - --password=cassandra
-      - --changeLogFile=db.changelog-scylla.xml
-      - update
-
-  # ========================
   # Kafka
   # ========================
   kafka:
@@ -138,17 +88,13 @@ services:
   # Kafka Connect
   # ========================
   kafka-connect:
-    build:
-      context: .
-      dockerfile: debezium-image.Dockerfile
+    image: quay.io/debezium/connect:3.4.3.Final
     ports:
       - "8083:8083"
     depends_on:
       kafka:
         condition: service_healthy
       liquibase-mysql:
-        condition: service_completed_successfully
-      liquibase-scylla:
         condition: service_completed_successfully
     environment:
       BOOTSTRAP_SERVERS: kafka:19092
@@ -194,28 +140,6 @@ services:
 
         echo "done"
 
-  # ========================
-  # Scylla Connector Bootstrap
-  # ========================
-  scylla-connector-bootstrap:
-    image: curlimages/curl:8.5.0
-    depends_on:
-      kafka-connect:
-        condition: service_healthy
-    volumes:
-      - ./scylla-connector-config.json:/scylla-connector-config.json
-    entrypoint:
-      - sh
-      - -c
-      - |
-        echo "registering...."
-
-        curl -X POST http://kafka-connect:8083/connectors \
-          -H "Content-Type: application/json" \
-          -d @/scylla-connector-config.json
-
-        echo "done"
-        
   # ========================
   # Kafka UI
   # ========================
@@ -276,7 +200,6 @@ services:
 
 volumes:
   mysql-data:
-  scylla_data:
   kafka-data:
   redis-data:
 

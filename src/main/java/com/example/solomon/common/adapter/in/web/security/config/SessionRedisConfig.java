@@ -37,7 +37,6 @@ public class SessionRedisConfig {
     @SpringSessionRedisConnectionFactory
     public RedisConnectionFactory redisConnectionFactory(RedisProperties props) {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-
         config.setHostName(props.host());
         config.setPort(props.port());
 
@@ -56,13 +55,13 @@ public class SessionRedisConfig {
     public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
         ObjectMapper mapper = new ObjectMapper();
 
-        List<Module> securityModules = SecurityJackson2Modules.getModules(getClass().getClassLoader());
-        mapper.registerModules(securityModules);
         mapper.registerModule(new CoreJackson2Module());
+        mapper.registerModules(
+                SecurityJackson2Modules.getModules(getClass().getClassLoader()));
 
+        mapper.addMixIn(SessionMember.class, SessionMemberMixin.class);
         mapper.addMixIn(SessionRedisOidcUser.class, SessionRedisOidcUserMixin.class);
         mapper.addMixIn(SessionRedisEmailUser.class, SessionRedisEmailUserMixin.class);
-        mapper.addMixIn(SessionMember.class, SessionMemberMixin.class);
 
         return new GenericJackson2JsonRedisSerializer(mapper);
     }

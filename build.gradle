@@ -19,7 +19,6 @@ repositories {
 
 configurations {
 	liquibaseMysqlDriver
-	liquibaseScyllaDriver
 }
 
 dependencies {
@@ -35,10 +34,11 @@ dependencies {
 	implementation("com.mysql:mysql-connector-j:8.0.32")
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
 
 	implementation("org.springframework.kafka:spring-kafka:3.3.16")
 	implementation("org.apache.kafka:kafka-streams")
+
+	implementation("org.rocksdb:rocksdbjni:10.4.2")
 
 	compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -46,7 +46,6 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
 	testImplementation "org.testcontainers:testcontainers-mysql:2.0.5"
-	testImplementation "org.testcontainers:testcontainers-scylladb:2.0.5"
 	testImplementation "org.testcontainers:testcontainers-kafka:2.0.5"
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 
@@ -56,8 +55,6 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	liquibaseMysqlDriver 'com.mysql:mysql-connector-j:8.0.32'
-	liquibaseScyllaDriver 'org.liquibase.ext:liquibase-cassandra:5.0.2'
-	liquibaseScyllaDriver 'com.ing.data:cassandra-jdbc-wrapper:5.0.2'
 }
 
 tasks.register('resolveLiquibaseMysqlDrivers', Copy) {
@@ -65,12 +62,7 @@ tasks.register('resolveLiquibaseMysqlDrivers', Copy) {
 	into layout.buildDirectory.dir('liquibase-drivers/mysql')
 }
 
-tasks.register('resolveLiquibaseScyllaDrivers', Copy) {
-	from configurations.liquibaseScyllaDriver
-	into layout.buildDirectory.dir('liquibase-drivers/scylla')
-}
-
 tasks.named('test') {
-	dependsOn resolveLiquibaseMysqlDrivers, resolveLiquibaseScyllaDrivers
+	dependsOn resolveLiquibaseMysqlDrivers
 	useJUnitPlatform()
 }

@@ -19,27 +19,18 @@ public class ChatKafkaConsumerConfig {
     private final KafkaConsumerFactorySupport factorySupport;
 
     @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageCreatedEvent> chatMessageCreatedEventConsumerFactory() {
+        return factorySupport.buildFactory(ChatMessageCreatedEvent.class, ChatKafkaTopicConfig.CHAT_MESSAGE_CREATED_EVENT);
+    }
+
+    @Bean
     public ConcurrentKafkaListenerContainerFactory<String, TrialCreatedEvent> trialCreatedEventConsumerFactory() {
-        return factorySupport.buildFactory(
-                TrialCreatedEvent.class,
-                TrialKafkaTopicConfig.TRIAL_CREATED_EVENT + "-consumer",
-                TrialKafkaTopicConfig.TRIAL_CREATED_EVENT);
+        return factorySupport.buildFactory(TrialCreatedEvent.class, TrialKafkaTopicConfig.TRIAL_CREATED_EVENT);
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, TrialJoinedEvent> trialJoinedEventConsumerFactory() {
-        return factorySupport.buildFactory(
-                TrialJoinedEvent.class,
-                TrialKafkaTopicConfig.TRIAL_JOINED_EVENT + "-consumer",
-                TrialKafkaTopicConfig.TRIAL_JOINED_EVENT);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageCreatedEvent> chatMessageCreatedEventConsumerFactory() {
-        return factorySupport.buildFactory(
-                ChatMessageCreatedEvent.class,
-                ChatKafkaTopicConfig.CHAT_MESSAGE_CREATED_EVENT + "-consumer",
-                ChatKafkaTopicConfig.CHAT_MESSAGE_CREATED_EVENT);
+        return factorySupport.buildFactory(TrialJoinedEvent.class, TrialKafkaTopicConfig.TRIAL_JOINED_EVENT);
     }
 
 }

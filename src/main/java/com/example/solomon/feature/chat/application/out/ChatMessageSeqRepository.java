@@ -1,9 +1,9 @@
 package com.example.solomon.feature.chat.application.out;
 
+import java.util.UUID;
+
 public interface ChatMessageSeqRepository {
 
-    public Long incr(String trialId);
-
-    public void fillBack(String trialId, String seq);
+    Long next(UUID trialId);
 
 }
