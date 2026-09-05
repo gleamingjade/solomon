@@ -20,4 +20,6 @@ public interface TrialRepository {
 
     public List<TrialMember> findAllTrialMembersByTrialId(UUID trialId);
 
+    public int updateLastMessageIfNewer(UUID id, String lastMessage, Long lastMessageSeq);
+
 }

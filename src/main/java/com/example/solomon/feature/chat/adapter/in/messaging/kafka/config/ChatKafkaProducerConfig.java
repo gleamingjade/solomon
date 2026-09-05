@@ -7,10 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 
-// See KafkaTemplateConfig (common) for the plain, shared KafkaTemplate. Only
-// CreateChatMessageUsecase's multi-message batch needs a transactional producer - a transaction
-// costs extra broker round trips per send (AddPartitionsToTxn, EndTxn on top of the plain
-// Produce call) that nothing else needs to pay for - so it stays chat-local.
 @Configuration
 public class ChatKafkaProducerConfig {
 

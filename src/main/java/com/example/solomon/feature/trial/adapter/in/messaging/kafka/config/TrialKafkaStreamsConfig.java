@@ -23,10 +23,9 @@ import com.example.solomon.feature.trial.domain.event.TrialJoinedEvent;
 @Configuration
 public class TrialKafkaStreamsConfig {
 
-
         @Bean
         public KStream<String, DebeziumEnvelope> trialCdcStream(
-                        @Qualifier("cdcStreamsBuilder") StreamsBuilder streamsBuilder) {
+                        @Qualifier("outboxStreamsBuilder") StreamsBuilder streamsBuilder) {
                 JsonSerde<DebeziumEnvelope> debeziumSerde = new JsonSerde<>(DebeziumEnvelope.class);
 
                 KStream<String, DebeziumEnvelope> stream = streamsBuilder.stream(KafkaTopicConfig.CDC_MYSQL_OUTBOX,

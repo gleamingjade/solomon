@@ -50,11 +50,6 @@ public class Trial extends UuidBaseEntity {
         return tr;
     }
 
-    public void onNewChatMessage(String lastMessage, Long lastMessageSeq) {
-        this.lastMessage = lastMessage;
-        this.lastMessageSeq = lastMessageSeq;
-    }
-
     private void validateIfJoinable(String nickname) {
         if (trialMembers.size() != 1) {
             throw new BusinessException(TrialException.CAPACITY_EXCEEDED);

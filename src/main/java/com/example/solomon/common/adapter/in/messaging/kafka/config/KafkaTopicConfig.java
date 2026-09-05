@@ -9,6 +9,7 @@ import org.springframework.kafka.config.TopicBuilder;
 // (see TrialKafkaStreamsConfig), so no single feature owns it - it's provisioned here instead.
 // Kafka Streams treats a missing source topic on startup as fatal, so it must exist before the
 // MySQL connector ever produces to it, not be created lazily by the connector.
+
 // Referenced by https://docs.spring.io/spring-kafka/reference/kafka/configuring-topics.html
 @Configuration
 public class KafkaTopicConfig {
@@ -18,7 +19,7 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic cdcMysqlOutboxTopic() {
         return TopicBuilder.name(CDC_MYSQL_OUTBOX)
-                .partitions(2)
+                .partitions(6)
                 .replicas(1)
                 .build();
     }

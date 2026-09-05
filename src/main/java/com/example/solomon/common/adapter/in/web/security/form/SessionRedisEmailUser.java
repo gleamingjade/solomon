@@ -14,14 +14,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-public class SessionRedisEmailUser implements UserDetails, SessionMemberHolder {
-
-    @JsonProperty("sessionMember")
-    private final SessionMember sessionMember;
+public record SessionRedisEmailUser(
+        @JsonProperty("sessionMember") SessionMember sessionMember) implements UserDetails, SessionMemberHolder {
 
     @JsonCreator
-    public SessionRedisEmailUser(@JsonProperty("sessionMember") SessionMember sessionMember) {
-        this.sessionMember = sessionMember;
+    public SessionRedisEmailUser {
     }
 
     @Override
@@ -31,7 +28,7 @@ public class SessionRedisEmailUser implements UserDetails, SessionMemberHolder {
 
     @Override
     public String getPassword() {
-        throw new UnsupportedOperationException("password is not retained in the session");
+        throw new UnsupportedOperationException("Password is not retained in the session.");
     }
 
     @Override
@@ -40,7 +37,7 @@ public class SessionRedisEmailUser implements UserDetails, SessionMemberHolder {
     }
 
     @Override
-    public SessionMember getSessionMember() {
+    public SessionMember sessionMember() {
         return sessionMember;
     }
 

@@ -26,11 +26,11 @@ public class FormLoginSuccessHandler implements AuthenticationSuccessHandler {
                 authentication.getAuthorities(),
                 request.getSession(true).getId());
 
-        SessionRedisEmailUser sessionRedisUser = new SessionRedisEmailUser(sessionMember);
+        SessionRedisEmailUser sessionRedisEmailUser = new SessionRedisEmailUser(sessionMember);
 
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(
-                        sessionRedisUser, null, sessionRedisUser.getAuthorities()));
+                        sessionRedisEmailUser, null, sessionRedisEmailUser.getAuthorities()));
 
         response.setStatus(HttpServletResponse.SC_OK);
     }

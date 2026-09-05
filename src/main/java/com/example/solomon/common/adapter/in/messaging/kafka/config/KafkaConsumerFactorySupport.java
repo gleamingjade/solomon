@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -21,9 +22,6 @@ import org.springframework.util.backoff.FixedBackOff;
 
 import lombok.extern.slf4j.Slf4j;
 
-// Shared by each feature's *KafkaConsumerConfig so every topic's container factory doesn't have
-// to re-implement base props, DLT wiring, and retry logging from scratch. See
-// https://docs.spring.io/spring-kafka/reference/kafka/container-factory.html
 @Slf4j
 @Component
 public class KafkaConsumerFactorySupport {
@@ -84,13 +82,6 @@ public class KafkaConsumerFactorySupport {
         return errorHandler;
     }
 
-    // KafkaTopicConfig creates each topic with 2 partitions, matched to our 2 app-server
-    // instances, so each container should only run 1 consumer thread here - the 2 instances
-    // together then hold exactly 1 partition each instead of over-subscribing.
-    //
-    // groupId is always "<topic>-consumer" and the error-log label is always the topic itself -
-    // every caller was building both from the same topic constant, so that's done here once
-    // instead of at every call site.
     public <T> ConcurrentKafkaListenerContainerFactory<String, T> buildFactory(Class<T> valueType, String topic) {
         Map<String, Object> props = getBaseProps();
         props.put(ConsumerConfig.GROUP_ID_CONFIG, topic + "-consumer");

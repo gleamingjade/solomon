@@ -8,7 +8,6 @@ import com.example.solomon.common.application.out.OutboxRepository;
 import com.example.solomon.common.domain.entity.jpa.Outbox;
 import com.example.solomon.common.domain.exception.BusinessException;
 import com.example.solomon.common.util.JsonUtils;
-import com.example.solomon.feature.chat.application.out.ChatServerManager;
 import com.example.solomon.feature.member.domain.exception.MemberException;
 import com.example.solomon.feature.member.domain.entity.Member;
 import com.example.solomon.feature.trial.application.in.usecase.dto.CreateTrialCommand;
@@ -29,8 +28,6 @@ public class CreateTrialUseCase {
 
     private final OutboxRepository outboxRepository;
 
-    private final ChatServerManager chatServerManager;
-
     @Transactional
     public String execute(CreateTrialCommand command) {
         Member member = memberRepository
@@ -41,8 +38,6 @@ public class CreateTrialUseCase {
             throw new BusinessException(TrialException.ONGOING_TRIAL_EXISTS);
 
         Trial trial = trialRepository.save(Trial.create(member, command.issueTitle(), command.nickname()));
-
-        chatServerManager.allocate(trial.getId().toString());
 
         outboxRepository.save(
                 Outbox.create(

@@ -19,8 +19,8 @@ public class ChatKafkaConsumerConfig {
     private final KafkaConsumerFactorySupport factorySupport;
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageCreatedEvent> chatMessageCreatedEventConsumerFactory() {
-        return factorySupport.buildFactory(ChatMessageCreatedEvent.class, ChatKafkaTopicConfig.CHAT_MESSAGE_CREATED_EVENT);
+    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageCreatedEvent> chatMessageAppliedEventConsumerFactory() {
+        return factorySupport.buildFactory(ChatMessageCreatedEvent.class, ChatKafkaTopicConfig.CHAT_MESSAGE_APPLIED_EVENT);
     }
 
     @Bean

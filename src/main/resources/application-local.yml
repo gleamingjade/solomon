@@ -6,7 +6,6 @@ spring:
       - optional:classpath:/config/local/application-local-kafka.yml
       - optional:classpath:/config/local/application-local-mysql.yml
       - optional:classpath:/config/local/application-local-redis.yml
-      - optional:classpath:/config/local/application-local-rocksdb.yml
       - optional:classpath:/config/local/application-local-oauth2.yml
       - optional:file:./env/local.env[.properties]
 

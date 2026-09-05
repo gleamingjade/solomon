@@ -1,6 +1,5 @@
 package com.example.solomon.common.adapter.in.web.security.config;
 
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,14 +22,9 @@ import com.example.solomon.common.adapter.in.web.security.SessionMemberMixin;
 import com.example.solomon.common.adapter.in.web.security.oauth.SessionRedisOidcUser;
 import com.example.solomon.common.adapter.in.web.security.oauth.SessionRedisOidcUserMixin;
 
-import java.util.List;
-
 @Configuration
 public class SessionRedisConfig {
 
-    // Single shared connection factory for the whole app (session storage + trial cache both
-    // point at this). It's the only RedisConnectionFactory bean, so Spring Session picks it up
-    // automatically without needing @SpringSessionRedisConnectionFactory.
     @Bean(name = "redisConnectionFactory")
     public RedisConnectionFactory redisConnectionFactory(RedisProperties props) {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();

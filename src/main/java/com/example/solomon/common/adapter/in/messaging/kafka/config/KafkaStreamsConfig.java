@@ -11,12 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 
-// Owns the single shared Kafka Streams topology entry point. Each feature's own
-// *KafkaStreamsConfig (e.g. TrialKafkaStreamsConfig, ChatKafkaStreamsConfig) injects the
-// "cdcStreamsBuilder" bean below via @Qualifier and registers its own CDC-relay branches onto it -
-// multiple @Configuration classes contributing to the same StreamsBuilder still merge into one
-// topology.
-// Referenced by https://docs.spring.io/spring-kafka/reference/streams.html#kafka-streams-example
 @Configuration
 public class KafkaStreamsConfig {
 
@@ -26,8 +20,8 @@ public class KafkaStreamsConfig {
                 this.bootstrapServers = bootstrapServers;
         }
 
-        @Bean(name = "cdcStreamsBuilder")
-        public StreamsBuilderFactoryBean cdcStreamsBuilder() {
+        @Bean(name = "outboxStreamsBuilder")
+        public StreamsBuilderFactoryBean outboxStreamsBuilder() {
                 Map<String, Object> props = new HashMap<>();
                 props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
                 props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

@@ -47,4 +47,9 @@ public class TrialRepositoryAdapter implements TrialRepository {
 
     }
 
+    @Override
+    public int updateLastMessageIfNewer(UUID id, String lastMessage, Long lastMessageSeq) {
+        return jpaTrialRepository.updateLastMessageIfNewer(id, lastMessage, lastMessageSeq);
+    }
+
 }

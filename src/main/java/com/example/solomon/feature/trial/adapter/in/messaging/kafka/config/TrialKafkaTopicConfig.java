@@ -17,7 +17,7 @@ public class TrialKafkaTopicConfig {
     @Bean
     public NewTopic trialCreatedEventTopic() {
         return TopicBuilder.name(TRIAL_CREATED_EVENT)
-                .partitions(2)
+                .partitions(6)
                 .replicas(1)
                 .build();
     }
@@ -25,7 +25,7 @@ public class TrialKafkaTopicConfig {
     @Bean
     public NewTopic trialJoinedEventTopic() {
         return TopicBuilder.name(TRIAL_JOINED_EVENT)
-                .partitions(2)
+                .partitions(6)
                 .replicas(1)
                 .build();
     }

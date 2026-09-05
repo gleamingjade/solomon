@@ -57,7 +57,7 @@ public class SessionRedisOidcUser implements OidcUser, SessionMemberHolder {
     }
 
     @Override
-    public SessionMember getSessionMember() {
+    public SessionMember sessionMember() {
         return sessionMember;
     }
 

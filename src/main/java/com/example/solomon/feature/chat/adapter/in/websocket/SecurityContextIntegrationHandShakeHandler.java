@@ -18,7 +18,7 @@ public class SecurityContextIntegrationHandShakeHandler extends DefaultHandshake
                                        Map<String, Object> attributes) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return principal instanceof SessionMemberHolder holder ? holder.getSessionMember() : null;
+        return principal instanceof SessionMemberHolder holder ? holder.sessionMember() : null;
     }
 
 }

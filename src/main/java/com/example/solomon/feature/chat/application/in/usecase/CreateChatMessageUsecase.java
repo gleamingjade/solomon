@@ -32,7 +32,7 @@ public class CreateChatMessageUsecase {
     // A single message has nothing to be atomic with, so this stays on the plain template -
     // no transaction round trips to pay for.
     public void execute(CreateChatMessageCommand command) {
-        publish(kafkaTemplate, toEvent(command));
+        produce(kafkaTemplate, toEvent(command));
     }
 
     // Wrapped in one Kafka transaction so the batch is all-or-nothing - without this, one
@@ -45,21 +45,20 @@ public class CreateChatMessageUsecase {
                 .toList();
 
         transactionalKafkaTemplate.executeInTransaction(ops -> {
-            events.forEach(event -> publish(ops, event));
+            events.forEach(event -> produce(ops, event));
             return null;
         });
     }
 
     private ChatMessageCreatedEvent toEvent(CreateChatMessageCommand command) {
-        Long seq = chatMessageSeqRepository.next(command.trialId());
-
-        return new ChatMessageCreatedEvent(command.trialId(), command.content(), seq, command.type(), serverId);
+        return new ChatMessageCreatedEvent(
+                command.trialId(), command.content(),
+                chatMessageSeqRepository.next(command.trialId()),
+                command.type(),
+                serverId);
     }
 
-    // Kafka is the durability commit point (see the "Chat Persistence" wiki doc) - RocksDB
-    // apply, WebSocket fanout, and derived work all happen downstream in the consumer, only
-    // once this produce succeeds.
-    private void publish(KafkaOperations<Object, Object> operations, ChatMessageCreatedEvent event) {
+    private void produce(KafkaOperations<Object, Object> operations, ChatMessageCreatedEvent event) {
         operations.send(
                 ChatKafkaTopicConfig.CHAT_MESSAGE_CREATED_EVENT,
                 event.trialId().toString(),
